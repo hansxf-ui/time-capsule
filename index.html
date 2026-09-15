@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,11 +10,9 @@
     :root {
       --primary: #6366f1;
       --primary-dark: #4f46e5;
-      --primary-light: #818cf8;
       --secondary: #f59e0b;
       --success: #10b981;
       --danger: #ef4444;
-      --warning: #f59e0b;
       --bg-light: #f8fafc;
       --bg-dark: #0f172a;
       --surface-light: #ffffff;
@@ -25,28 +23,21 @@
       --text-muted-dark: #94a3b8;
       --border-light: #e2e8f0;
       --border-dark: #334155;
-      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
       --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
-      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1);
       --radius: 16px;
       --radius-sm: 8px;
       --radius-lg: 24px;
     }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background: var(--bg-light);
       color: var(--text-light);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s ease;
       line-height: 1.6;
-      overflow-x: hidden;
     }
 
     body.dark-mode {
@@ -54,27 +45,6 @@
       color: var(--text-dark);
     }
 
-    /* Animated Background */
-    body::before {
-      content: '';
-      position: fixed;
-      top: -50%;
-      left: -50%;
-      width: 200%;
-      height: 200%;
-      background: radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-                  radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
-      animation: bgFloat 20s ease-in-out infinite;
-      pointer-events: none;
-      z-index: -1;
-    }
-
-    @keyframes bgFloat {
-      0%, 100% { transform: translate(0, 0) rotate(0deg); }
-      50% { transform: translate(2%, 2%) rotate(1deg); }
-    }
-
-    /* Navbar */
     .navbar {
       background: rgba(255, 255, 255, 0.8);
       backdrop-filter: blur(20px);
@@ -83,7 +53,6 @@
       position: sticky;
       top: 0;
       z-index: 1000;
-      box-shadow: var(--shadow-sm);
     }
 
     body.dark-mode .navbar {
@@ -99,6 +68,7 @@
       justify-content: space-between;
       align-items: center;
       gap: 1rem;
+      flex-wrap: wrap;
     }
 
     .logo {
@@ -122,7 +92,6 @@
       justify-content: center;
       color: white;
       font-size: 1.25rem;
-      box-shadow: var(--shadow);
     }
 
     .nav-actions {
@@ -139,7 +108,7 @@
       padding: 0.5rem 1rem;
       background: var(--bg-light);
       border-radius: var(--radius-sm);
-      max-width: 200px;
+      max-width: 180px;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -157,9 +126,10 @@
       font-weight: 600;
       font-size: 0.95rem;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s ease;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 0.5rem;
       white-space: nowrap;
     }
@@ -167,12 +137,11 @@
     .btn-primary {
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
-      box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4);
     }
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.5);
+      box-shadow: var(--shadow-lg);
     }
 
     .btn-outline {
@@ -190,21 +159,12 @@
       background: var(--danger);
       color: white;
       padding: 0.5rem 1rem;
-      font-size: 0.85rem;
-    }
-
-    .btn-danger:hover {
-      background: #dc2626;
     }
 
     .btn-icon {
       width: 44px;
       height: 44px;
       padding: 0;
-      border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
 
     .theme-toggle {
@@ -219,18 +179,12 @@
       color: var(--text-dark);
     }
 
-    .theme-toggle:hover {
-      transform: rotate(20deg) scale(1.1);
-    }
-
-    /* Container */
     .container {
       max-width: 1200px;
       margin: 0 auto;
       padding: 2rem 24px;
     }
 
-    /* Hero */
     .hero {
       text-align: center;
       padding: 3rem 0;
@@ -244,7 +198,6 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
       margin-bottom: 0.75rem;
-      line-height: 1.2;
     }
 
     .hero p {
@@ -256,7 +209,6 @@
       color: var(--text-muted-dark);
     }
 
-    /* Card */
     .card {
       background: var(--surface-light);
       border-radius: var(--radius-lg);
@@ -264,7 +216,6 @@
       box-shadow: var(--shadow);
       border: 1px solid var(--border-light);
       margin-bottom: 2rem;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     body.dark-mode .card {
@@ -272,12 +223,6 @@
       border: 1px solid var(--border-dark);
     }
 
-    .card:hover {
-      box-shadow: var(--shadow-lg);
-      transform: translateY(-2px);
-    }
-
-    /* Form */
     .form-group {
       margin-bottom: 1.5rem;
     }
@@ -286,12 +231,6 @@
       display: block;
       margin-bottom: 0.5rem;
       font-weight: 600;
-      color: var(--text-light);
-      font-size: 0.95rem;
-    }
-
-    body.dark-mode .form-group label {
-      color: var(--text-dark);
     }
 
     .form-control {
@@ -302,8 +241,6 @@
       font-size: 1rem;
       background: var(--surface-light);
       color: var(--text-light);
-      transition: all 0.3s;
-      font-family: inherit;
     }
 
     body.dark-mode .form-control {
@@ -315,7 +252,6 @@
     .form-control:focus {
       outline: none;
       border-color: var(--primary);
-      box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
     }
 
     textarea.form-control {
@@ -323,7 +259,6 @@
       resize: vertical;
     }
 
-    /* Capsule Grid */
     .capsule-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
@@ -337,34 +272,11 @@
       box-shadow: var(--shadow);
       border: 1px solid var(--border-light);
       position: relative;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
     }
 
     body.dark-mode .capsule-card {
       background: var(--surface-dark);
       border: 1px solid var(--border-dark);
-    }
-
-    .capsule-card:hover {
-      transform: translateY(-4px);
-      box-shadow: var(--shadow-xl);
-    }
-
-    .capsule-card::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 4px;
-      background: linear-gradient(90deg, var(--primary), #8b5cf6);
-      transform: scaleX(0);
-      transition: transform 0.3s ease;
-    }
-
-    .capsule-card:hover::before {
-      transform: scaleX(1);
     }
 
     .capsule-status {
@@ -375,17 +287,15 @@
       border-radius: 20px;
       font-size: 0.75rem;
       font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
     .status-locked {
-      background: linear-gradient(135deg, #fef3c7, #fde68a);
+      background: #fef3c7;
       color: #92400e;
     }
 
     .status-unlocked {
-      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      background: #d1fae5;
       color: #065f46;
     }
 
@@ -393,12 +303,7 @@
       font-size: 1.25rem;
       font-weight: 700;
       margin-bottom: 0.5rem;
-      color: var(--text-light);
       padding-right: 5rem;
-    }
-
-    body.dark-mode .capsule-title {
-      color: var(--text-dark);
     }
 
     .capsule-date {
@@ -424,22 +329,17 @@
       border-radius: var(--radius-sm);
       text-align: center;
       flex: 1;
-      box-shadow: var(--shadow);
     }
 
     .countdown-value {
       font-size: 1.5rem;
       font-weight: 800;
       display: block;
-      line-height: 1;
     }
 
     .countdown-label {
       font-size: 0.65rem;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 0.25rem;
-      opacity: 0.9;
     }
 
     .capsule-preview {
@@ -452,7 +352,6 @@
       max-height: 100px;
       overflow: hidden;
       position: relative;
-      line-height: 1.6;
     }
 
     body.dark-mode .capsule-preview {
@@ -481,7 +380,6 @@
       margin-top: 1rem;
     }
 
-    /* Modal */
     .modal {
       position: fixed;
       top: 0;
@@ -496,7 +394,7 @@
       z-index: 2000;
       opacity: 0;
       visibility: hidden;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.3s ease;
     }
 
     .modal.active {
@@ -510,11 +408,8 @@
       padding: 2.5rem;
       max-width: 500px;
       width: 90%;
-      max-height: 80vh;
-      overflow-y: auto;
-      transform: scale(0.9) translateY(20px);
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      box-shadow: var(--shadow-xl);
+      transform: scale(0.9);
+      transition: all 0.3s ease;
     }
 
     body.dark-mode .modal-content {
@@ -522,7 +417,7 @@
     }
 
     .modal.active .modal-content {
-      transform: scale(1) translateY(0);
+      transform: scale(1);
     }
 
     .modal-header {
@@ -535,11 +430,6 @@
     .modal-title {
       font-size: 1.5rem;
       font-weight: 800;
-      color: var(--text-light);
-    }
-
-    body.dark-mode .modal-title {
-      color: var(--text-dark);
     }
 
     .modal-close {
@@ -547,71 +437,37 @@
       border: none;
       font-size: 1.5rem;
       cursor: pointer;
-      color: var(--text-muted-light);
       width: 40px;
       height: 40px;
       border-radius: var(--radius-sm);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s;
-    }
-
-    .modal-close:hover {
-      background: var(--bg-light);
-      color: var(--danger);
-    }
-
-    body.dark-mode .modal-close:hover {
-      background: var(--bg-dark);
     }
 
     .modal-message {
       white-space: pre-wrap;
       line-height: 1.8;
-      color: var(--text-light);
-      font-size: 1rem;
       margin-bottom: 1.5rem;
     }
 
-    body.dark-mode .modal-message {
-      color: var(--text-dark);
-    }
-
-    /* Alert */
     .alert {
       padding: 1rem 1.5rem;
       border-radius: var(--radius-sm);
       margin-bottom: 1.5rem;
       text-align: center;
       font-weight: 600;
-      animation: slideDown 0.3s ease;
-    }
-
-    @keyframes slideDown {
-      from {
-        opacity: 0;
-        transform: translateY(-10px);
-      }
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
     }
 
     .alert-success {
-      background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+      background: #d1fae5;
       color: #065f46;
       border: 2px solid var(--success);
     }
 
     .alert-error {
-      background: linear-gradient(135deg, #fee2e2, #fecaca);
+      background: #fee2e2;
       color: #991b1b;
       border: 2px solid var(--danger);
     }
 
-    /* Empty State */
     .empty-state {
       text-align: center;
       padding: 4rem 2rem;
@@ -623,27 +479,6 @@
       opacity: 0.5;
     }
 
-    .empty-state h3 {
-      font-size: 1.5rem;
-      font-weight: 700;
-      margin-bottom: 0.75rem;
-      color: var(--text-light);
-    }
-
-    body.dark-mode .empty-state h3 {
-      color: var(--text-dark);
-    }
-
-    .empty-state p {
-      color: var(--text-muted-light);
-      margin-bottom: 1.5rem;
-    }
-
-    body.dark-mode .empty-state p {
-      color: var(--text-muted-dark);
-    }
-
-    /* Section Header */
     .section-header {
       display: flex;
       justify-content: space-between;
@@ -656,89 +491,21 @@
     .section-title {
       font-size: 1.5rem;
       font-weight: 800;
-      color: var(--text-light);
       display: flex;
       align-items: center;
       gap: 0.75rem;
     }
 
-    body.dark-mode .section-title {
-      color: var(--text-dark);
-    }
+    .hidden { display: none !important; }
 
-    /* Responsive */
     @media (max-width: 768px) {
-      .hero h1 {
-        font-size: 2rem;
-      }
-
-      .capsule-grid {
-        grid-template-columns: 1fr;
-      }
-
-      .navbar-content {
-        flex-wrap: wrap;
-      }
-
-      .user-email {
-        display: none;
-      }
-
-      .section-header {
-        flex-direction: column;
-        align-items: stretch;
-      }
-    }
-
-    /* Loading */
-    .loading {
-      display: inline-block;
-      width: 20px;
-      height: 20px;
-      border: 3px solid rgba(255,255,255,0.3);
-      border-radius: 50%;
-      border-top-color: white;
-      animation: spin 0.8s linear infinite;
-    }
-
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 8px;
-      height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-      background: var(--bg-light);
-    }
-
-    body.dark-mode ::-webkit-scrollbar-track {
-      background: var(--bg-dark);
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: var(--border-light);
-      border-radius: 4px;
-    }
-
-    body.dark-mode ::-webkit-scrollbar-thumb {
-      background: var(--border-dark);
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: var(--text-muted-light);
-    }
-
-    body.dark-mode ::-webkit-scrollbar-thumb:hover {
-      background: var(--text-muted-dark);
+      .hero h1 { font-size: 2rem; }
+      .capsule-grid { grid-template-columns: 1fr; }
+      .user-email { display: none; }
     }
   </style>
 </head>
 <body>
-  <!-- Navbar -->
   <nav class="navbar">
     <div class="navbar-content">
       <a href="#" class="logo">
@@ -746,143 +513,82 @@
         <span>Time Capsule</span>
       </a>
       <div class="nav-actions">
-        <button class="btn btn-icon theme-toggle" id="themeToggle" title="Toggle Dark Mode">
-          🌙
-        </button>
+        <button class="btn btn-icon theme-toggle" id="themeToggle">🌙</button>
         <span id="userName" class="user-email hidden"></span>
-        <button id="authBtn" class="btn btn-primary">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-            <circle cx="12" cy="7" r="4"></circle>
-          </svg>
-          <span>Login</span>
-        </button>
+        <button id="authBtn" class="btn btn-primary">Login</button>
       </div>
     </div>
   </nav>
 
-  <!-- Main Content -->
   <div class="container">
-    <!-- Alert -->
     <div id="alertBox"></div>
 
-    <!-- Hero -->
     <div class="hero">
       <h1>Save Messages for the Future</h1>
       <p>Lock your memories and open them when the time is right</p>
     </div>
 
-    <!-- Auth Forms -->
     <div id="authForms" class="card hidden" style="max-width: 450px; margin: 2rem auto;">
-      <h2 id="authTitle" style="margin-bottom: 0.5rem; text-align: center; font-weight: 800; color: var(--primary);">Login</h2>
-      <p style="text-align: center; color: var(--text-muted-light); margin-bottom: 2rem;">Welcome back! Please sign in to continue.</p>
+      <h2 id="authTitle" style="text-align: center; margin-bottom: 0.5rem; color: var(--primary);">Login</h2>
+      <p style="text-align: center; color: var(--text-muted-light); margin-bottom: 2rem;">Welcome back!</p>
       
       <div class="form-group">
-        <label for="authEmail">Email Address</label>
+        <label>Email</label>
         <input type="email" id="authEmail" class="form-control" placeholder="you@example.com">
       </div>
-
       <div class="form-group">
-        <label for="authPassword">Password</label>
+        <label>Password</label>
         <input type="password" id="authPassword" class="form-control" placeholder="••••••••">
       </div>
-
       <div class="form-group hidden" id="nameGroup">
-        <label for="authName">Full Name</label>
+        <label>Full Name</label>
         <input type="text" id="authName" class="form-control" placeholder="John Doe">
       </div>
-
-      <button id="authSubmitBtn" class="btn btn-primary" style="width: 100%;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-          <polyline points="10 17 15 12 10 7"></polyline>
-          <line x1="15" y1="12" x2="3" y2="12"></line>
-        </svg>
-        <span>Login</span>
-      </button>
-      
-      <p style="text-align: center; margin-top: 1.5rem; color: var(--text-muted-light);">
-        <a href="#" id="toggleAuth" style="color: var(--primary); font-weight: 600; text-decoration: none;">Don't have an account? Sign up</a>
+      <button id="authSubmitBtn" class="btn btn-primary" style="width: 100%;">Login</button>
+      <p style="text-align: center; margin-top: 1.5rem;">
+        <a href="#" id="toggleAuth" style="color: var(--primary);">No account? Sign up</a>
       </p>
     </div>
 
-    <!-- Create Capsule Form -->
     <div id="createForm" class="card hidden">
-      <h2 style="margin-bottom: 1.5rem; color: var(--primary); font-weight: 800; display: flex; align-items: center; gap: 0.75rem;">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 5v14M5 12h14"></path>
-        </svg>
-        Create Time Capsule
-      </h2>
-      
+      <h2 style="margin-bottom: 1.5rem; color: var(--primary);">Create Time Capsule</h2>
       <div class="form-group">
-        <label for="capsuleTitle">Capsule Title</label>
-        <input type="text" id="capsuleTitle" class="form-control" placeholder="e.g., To my 30-year-old self">
+        <label>Title</label>
+        <input type="text" id="capsuleTitle" class="form-control" placeholder="To my 30-year-old self">
       </div>
-
       <div class="form-group">
-        <label for="capsuleMessage">Your Message</label>
-        <textarea id="capsuleMessage" class="form-control" placeholder="Write your message to the future..."></textarea>
+        <label>Message</label>
+        <textarea id="capsuleMessage" class="form-control" placeholder="Write your message..."></textarea>
       </div>
-
       <div class="form-group">
-        <label for="capsuleDate">Unlock Date & Time</label>
+        <label>Unlock Date</label>
         <input type="datetime-local" id="capsuleDate" class="form-control">
       </div>
-
       <div class="form-group">
-        <label for="capsulePassword">Password Protection (Optional)</label>
-        <input type="password" id="capsulePassword" class="form-control" placeholder="Leave empty for no password">
+        <label>Password (optional)</label>
+        <input type="password" id="capsulePassword" class="form-control" placeholder="Leave empty">
       </div>
-
-      <button id="createCapsuleBtn" class="btn btn-primary" style="width: 100%;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
-          <polyline points="17 21 17 13 7 13 7 21"></polyline>
-          <polyline points="7 3 7 8 15 8"></polyline>
-        </svg>
-        Create Capsule
-      </button>
+      <button id="createCapsuleBtn" class="btn btn-primary" style="width: 100%;">Create Capsule</button>
     </div>
 
-    <!-- Capsules Section -->
     <div id="capsulesSection" class="hidden">
       <div class="section-header">
-        <h2 class="section-title">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-            <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-            <line x1="12" y1="22.08" x2="12" y2="12"></line>
-          </svg>
-          Your Capsules
-        </h2>
-        <button class="btn btn-primary" onclick="showCreateForm()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 5v14M5 12h14"></path>
-          </svg>
-          New Capsule
-        </button>
+        <h2 class="section-title">Your Capsules</h2>
+        <button class="btn btn-primary" onclick="showCreateForm()">+ New Capsule</button>
       </div>
       <div id="capsuleGrid" class="capsule-grid"></div>
     </div>
 
-    <!-- Empty State -->
     <div id="emptyState" class="card hidden">
       <div class="empty-state">
         <div class="empty-state-icon">📦</div>
         <h3>No Capsules Yet</h3>
-        <p>Create your first time capsule and lock your memories for the future!</p>
-        <button class="btn btn-primary" onclick="showCreateForm()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 5v14M5 12h14"></path>
-          </svg>
-          Create Your First Capsule
-        </button>
+        <p style="color: var(--text-muted-light); margin: 1rem 0;">Create your first time capsule!</p>
+        <button class="btn btn-primary" onclick="showCreateForm()">Create Capsule</button>
       </div>
     </div>
   </div>
 
-  <!-- View Modal -->
   <div id="viewModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
@@ -891,63 +597,42 @@
       </div>
       <div id="modalMessage" class="modal-message"></div>
       <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
-        <button class="btn btn-primary" onclick="shareToWA()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
-          </svg>
-          Share on WhatsApp
-        </button>
-        <button class="btn btn-outline" onclick="copyLink()">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
-            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
-          </svg>
-          Copy Link
-        </button>
+        <button class="btn btn-primary" onclick="shareToWA()">Share on WhatsApp</button>
+        <button class="btn btn-outline" onclick="copyLink()">Copy Link</button>
       </div>
       <button class="btn btn-outline" onclick="closeModal()" style="width: 100%;">Close</button>
     </div>
   </div>
 
-  <!-- Password Modal -->
   <div id="passwordModal" class="modal">
     <div class="modal-content" style="max-width: 400px;">
       <div class="modal-header">
         <h3 class="modal-title">🔒 Enter Password</h3>
         <button class="modal-close" onclick="closePasswordModal()">×</button>
       </div>
-      <input type="password" id="capsulePasswordInput" class="form-control" placeholder="Capsule password" style="margin-bottom: 1rem;">
-      <button id="unlockBtn" class="btn btn-primary" style="width: 100%;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-          <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-        </svg>
-        Unlock Capsule
-      </button>
+      <input type="password" id="capsulePasswordInput" class="form-control" placeholder="Password" style="margin-bottom: 1rem;">
+      <button id="unlockBtn" class="btn btn-primary" style="width: 100%;">Unlock</button>
       <button class="btn btn-outline" onclick="closePasswordModal()" style="width: 100%; margin-top: 0.75rem;">Cancel</button>
     </div>
   </div>
 
   <script>
-    // ===== SUPABASE CONFIG =====
     const SUPABASE_URL = 'https://lpuvkrbdctankydvmzpy.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_XOX5zgpPR4GUL6EIJf0xRg_GaRPRzak';
     
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // ===== STATE =====
     let currentUser = null;
     let capsules = [];
     let isLoginMode = true;
     let currentCapsuleId = null;
 
-    // ===== INIT =====
     document.addEventListener('DOMContentLoaded', async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         currentUser = session.user;
         showLoggedIn();
-        loadCapsules();
+        await loadCapsules();
       } else {
         showLoggedOut();
       }
@@ -965,7 +650,6 @@
       document.getElementById('capsuleDate').value = now.toISOString().slice(0, 16);
     });
 
-    // ===== AUTH =====
     document.getElementById('authBtn').addEventListener('click', () => {
       document.getElementById('authForms').classList.remove('hidden');
       document.getElementById('createForm').classList.add('hidden');
@@ -976,10 +660,10 @@
       e.preventDefault();
       isLoginMode = !isLoginMode;
       document.getElementById('authTitle').textContent = isLoginMode ? 'Login' : 'Sign Up';
-      const btnText = document.querySelector('#authSubmitBtn span');
+      const btnText = document.querySelector('#authSubmitBtn');
       btnText.textContent = isLoginMode ? 'Login' : 'Sign Up';
       document.getElementById('nameGroup').classList.toggle('hidden', isLoginMode);
-      document.getElementById('toggleAuth').textContent = isLoginMode ? "Don't have an account? Sign up" : 'Already have an account? Login';
+      document.getElementById('toggleAuth').textContent = isLoginMode ? "No account? Sign up" : 'Already have an account? Login';
     });
 
     document.getElementById('authSubmitBtn').addEventListener('click', async () => {
@@ -1005,7 +689,7 @@
           currentUser = data.user;
           showAlert('Welcome back! 🎉', 'success');
           showLoggedIn();
-          loadCapsules();
+          await loadCapsules();
         }
       } else {
         const { data, error } = await supabase.auth.signUp({ email, password });
@@ -1016,7 +700,7 @@
           currentUser = data.user;
           showAlert('Account created! 🎉', 'success');
           showLoggedIn();
-          loadCapsules();
+          await loadCapsules();
         }
       }
     });
@@ -1028,14 +712,7 @@
     }
 
     function showLoggedIn() {
-      document.getElementById('authBtn').innerHTML = `
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-          <polyline points="16 17 21 12 16 7"></polyline>
-          <line x1="21" y1="12" x2="9" y2="12"></line>
-        </svg>
-        <span>Logout</span>
-      `;
+      document.getElementById('authBtn').innerHTML = 'Logout';
       document.getElementById('authBtn').onclick = logout;
       document.getElementById('userName').textContent = currentUser.email;
       document.getElementById('userName').classList.remove('hidden');
@@ -1045,21 +722,18 @@
     }
 
     function showLoggedOut() {
-      document.getElementById('authBtn').innerHTML = `
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-          <circle cx="12" cy="7" r="4"></circle>
-        </svg>
-        <span>Login</span>
-      `;
-      document.getElementById('authBtn').onclick = () => document.getElementById('authForms').classList.remove('hidden');
+      document.getElementById('authBtn').innerHTML = 'Login';
+      document.getElementById('authBtn').onclick = () => {
+        document.getElementById('authForms').classList.remove('hidden');
+        document.getElementById('createForm').classList.add('hidden');
+        document.getElementById('capsulesSection').classList.add('hidden');
+      };
       document.getElementById('userName').classList.add('hidden');
       document.getElementById('authForms').classList.add('hidden');
       document.getElementById('createForm').classList.add('hidden');
       document.getElementById('capsulesSection').classList.add('hidden');
     }
 
-    // ===== CAPSULES =====
     async function loadCapsules() {
       const { data, error } = await supabase
         .from('capsules')
@@ -1079,16 +753,17 @@
     function renderCapsules() {
       const grid = document.getElementById('capsuleGrid');
       const emptyState = document.getElementById('emptyState');
+      const capsulesSection = document.getElementById('capsulesSection');
 
       if (capsules.length === 0) {
         grid.innerHTML = '';
         emptyState.classList.remove('hidden');
-        document.getElementById('capsulesSection').classList.add('hidden');
+        capsulesSection.classList.add('hidden');
         return;
       }
 
       emptyState.classList.add('hidden');
-      document.getElementById('capsulesSection').classList.remove('hidden');
+      capsulesSection.classList.remove('hidden');
 
       grid.innerHTML = capsules.map(capsule => {
         const openAt = new Date(capsule.open_at);
@@ -1099,13 +774,13 @@
         return `
           <div class="capsule-card">
             <span class="capsule-status ${isUnlocked ? 'status-unlocked' : 'status-locked'}">
-              ${isUnlocked ? '🔓 Unlocked' : '🔒 Locked'}
+              ${isUnlocked ? 'Unlocked' : 'Locked'}
             </span>
             <h3 class="capsule-title">${escapeHtml(capsule.title)}</h3>
             <p class="capsule-date">
               ${isUnlocked ? 
-                `Opened: ${openAt.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}` : 
-                `Opens: ${openAt.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`
+                `Opened: ${openAt.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}` : 
+                `Opens: ${openAt.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}`
               }
             </p>
             ${!isUnlocked && timeLeft ? `
@@ -1125,32 +800,15 @@
               </div>
             ` : ''}
             <div class="capsule-preview">
-              ${isUnlocked ? escapeHtml(capsule.message) : '🔒 Message will be revealed when capsule unlocks...'}
+              ${isUnlocked ? escapeHtml(capsule.message) : '🔒 Message will be revealed when unlocked...'}
             </div>
             <div class="capsule-actions">
               ${isUnlocked ? `
-                <button class="btn btn-primary" onclick="viewCapsule('${capsule.id}')" style="flex: 1;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                  Read
-                </button>
+                <button class="btn btn-primary" onclick="viewCapsule('${capsule.id}')" style="flex: 1;">Read</button>
               ` : `
-                <button class="btn btn-outline" onclick="previewCapsule('${capsule.id}')" style="flex: 1;">
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
-                    <circle cx="12" cy="12" r="3"></circle>
-                  </svg>
-                  Preview
-                </button>
+                <button class="btn btn-outline" onclick="previewCapsule('${capsule.id}')" style="flex: 1;">Preview</button>
               `}
-              <button class="btn btn-danger" onclick="deleteCapsule('${capsule.id}')">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <polyline points="3 6 5 6 21 6"></polyline>
-                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                </svg>
-              </button>
+              <button class="btn btn-danger" onclick="deleteCapsule('${capsule.id}')">Delete</button>
             </div>
           </div>
         `;
@@ -1159,6 +817,7 @@
 
     function showCreateForm() {
       document.getElementById('createForm').classList.remove('hidden');
+      document.getElementById('capsulesSection').classList.add('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -1185,32 +844,32 @@
         }]);
 
       if (error) {
-        showAlert('Failed to create capsule: ' + error.message, 'error');
+        showAlert('Failed: ' + error.message, 'error');
       } else {
-        showAlert('Capsule created successfully! 🎉', 'success');
+        showAlert('Capsule created! 🎉', 'success');
         document.getElementById('capsuleTitle').value = '';
         document.getElementById('capsuleMessage').value = '';
         document.getElementById('capsulePassword').value = '';
-        loadCapsules();
+        document.getElementById('createForm').classList.add('hidden');
+        document.getElementById('capsulesSection').classList.remove('hidden');
+        await loadCapsules();
       }
     });
 
     async function deleteCapsule(id) {
-      if (!confirm('Are you sure you want to delete this capsule?')) return;
-      
+      if (!confirm('Delete this capsule?')) return;
       const { error } = await supabase.from('capsules').delete().eq('id', id);
       if (error) {
         showAlert('Failed to delete', 'error');
       } else {
-        showAlert('Capsule deleted', 'success');
-        loadCapsules();
+        showAlert('Deleted', 'success');
+        await loadCapsules();
       }
     }
 
     function viewCapsule(id) {
       const capsule = capsules.find(c => c.id === id);
       if (!capsule) return;
-
       if (capsule.password) {
         currentCapsuleId = id;
         document.getElementById('passwordModal').classList.add('active');
@@ -1222,12 +881,11 @@
     document.getElementById('unlockBtn').addEventListener('click', () => {
       const password = document.getElementById('capsulePasswordInput').value;
       const capsule = capsules.find(c => c.id === currentCapsuleId);
-      
       if (capsule.password === password) {
         showCapsuleContent(capsule);
         closePasswordModal();
       } else {
-        showAlert('Incorrect password!', 'error');
+        showAlert('Wrong password!', 'error');
       }
     });
 
@@ -1242,8 +900,7 @@
       if (!capsule) return;
       const openAt = new Date(capsule.open_at);
       alert(`🔒 ${capsule.title}
-
-Opens: ${openAt.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`);
+Opens: ${openAt.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`);
     }
 
     function closeModal() {
@@ -1257,16 +914,15 @@ Opens: ${openAt.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', m
     }
 
     function shareToWA() {
-      const text = `🎉 I just opened my Time Capsule! Check it out!`;
+      const text = `🎉 I just opened my Time Capsule!`;
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
 
     function copyLink() {
       navigator.clipboard.writeText(window.location.href);
-      showAlert('Link copied to clipboard!', 'success');
+      showAlert('Link copied!', 'success');
     }
 
-    // ===== UTILS =====
     function getTimeLeft(openAt) {
       const diff = openAt - new Date();
       if (diff <= 0) return null;
