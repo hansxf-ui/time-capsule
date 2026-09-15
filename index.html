@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>⏰ Time Capsule Digital</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-dark: #4338CA;
+      --secondary: #F59E0B;
+      --success: #10B981;
+      --danger: #EF4444;
+      --bg-light: #F9FAFB;
+      --bg-dark: #111827;
+      --text-light: #1F2937;
+      --text-dark: #F9FAFB;
+      --card-light: #FFFFFF;
+      --card-dark: #1F2937;
+      --border-light: #E5E7EB;
+      --border-dark: #374151;
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-light);
+      color: var(--text-light);
+      transition: all 0.3s ease;
+    }
+
+    body.dark-mode {
+      background: var(--bg-dark);
+      color: var(--text-dark);
+    }
+
+    .navbar {
+      background: var(--card-light);
+      border-bottom: 1px solid var(--border-light);
+      padding: 1rem 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow);
+    }
+
+    body.dark-mode .navbar {
+      background: var(--card-dark);
+      border-bottom: 1px solid var(--border-dark);
+    }
+
+    .navbar-content {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    .nav-actions {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-size: 0.95rem;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .btn-outline {
+      background: transparent;
+      border: 2px solid var(--primary);
+      color: var(--primary);
+    }
+
+    .btn-outline:hover {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+      padding: 0.5rem 1rem;
+    }
+
+    .theme-toggle {
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 1.5rem;
+      color: var(--text-light);
+    }
+
+    body.dark-mode .theme-toggle {
+      color: var(--text-dark);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 20px;
+    }
+
+    .card {
+      background: var(--card-light);
+      border-radius: var(--radius);
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      margin-bottom: 2rem;
+    }
+
+    body.dark-mode .card {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 2px solid var(--border-light);
+      border-radius: var(--radius);
+      font-size: 1rem;
+      background: var(--card-light);
+      color: var(--text-light);
+    }
+
+    body.dark-mode .form-control {
+      background: var(--card-dark);
+      color: var(--text-dark);
+      border-color: var(--border-dark);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary);
+    }
+
+    .capsule-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .capsule-card {
+      background: var(--card-light);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border-light);
+      position: relative;
+    }
+
+    body.dark-mode .capsule-card {
+      background: var(--card-dark);
+      border: 1px solid var(--border-dark);
+    }
+
+    .capsule-status {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .status-locked {
+      background: #FEF3C7;
+      color: #92400E;
+    }
+
+    .status-unlocked {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .countdown {
+      display: flex;
+      gap: 0.5rem;
+      margin: 1rem 0;
+    }
+
+    .countdown-item {
+      background: var(--primary);
+      color: white;
+      padding: 0.5rem 1rem;
+      border-radius: var(--radius);
+      text-align: center;
+      flex: 1;
+    }
+
+    .countdown-value {
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: block;
+    }
+
+    .countdown-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+    }
+
+    .modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+    }
+
+    .modal.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal-content {
+      background: var(--card-light);
+      border-radius: var(--radius);
+      padding: 2rem;
+      max-width: 500px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+
+    body.dark-mode .modal-content {
+      background: var(--card-dark);
+    }
+
+    .alert {
+      padding: 1rem;
+      border-radius: var(--radius);
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+
+    .alert-success {
+      background: #D1FAE5;
+      color: #065F46;
+    }
+
+    .alert-error {
+      background: #FEE2E2;
+      color: #991B1B;
+    }
+
+    .hidden { display: none; }
+
+    @media (max-width: 600px) {
+      .capsule-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-content">
+      <a href="#" class="logo">⏰ Time Capsule</a>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+        <span id="userName" class="hidden"></span>
+        <button id="authBtn" class="btn btn-primary">Login</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <!-- Alert -->
+    <div id="alertBox"></div>
+
+    <!-- Auth Forms -->
+    <div id="authForms" class="card hidden" style="max-width: 400px; margin: 2rem auto;">
+      <h2 id="authTitle" style="margin-bottom: 1.5rem; text-align: center;">Login</h2>
+      
+      <div class="form-group">
+        <label for="authEmail">Email</label>
+        <input type="email" id="authEmail" class="form-control" placeholder="nama@email.com">
+      </div>
+
+      <div class="form-group">
+        <label for="authPassword">Password</label>
+        <input type="password" id="authPassword" class="form-control" placeholder="••••••••">
+      </div>
+
+      <div class="form-group hidden" id="nameGroup">
+        <label for="authName">Nama</label>
+        <input type="text" id="authName" class="form-control" placeholder="John Doe">
+      </div>
+
+      <button id="authSubmitBtn" class="btn btn-primary" style="width: 100%;">Login</button>
+      
+      <p style="text-align: center; margin-top: 1rem;">
+        <a href="#" id="toggleAuth" style="color: var(--primary);">Belum punya akun? Daftar</a>
+      </p>
+    </div>
+
+    <!-- Create Capsule Form -->
+    <div id="createForm" class="card hidden">
+      <h2 style="margin-bottom: 1.5rem; color: var(--primary);">🎁 Buat Time Capsule</h2>
+      
+      <div class="form-group">
+        <label for="capsuleTitle">Judul</label>
+        <input type="text" id="capsuleTitle" class="form-control" placeholder="Contoh: Untuk diriku di usia 30">
+      </div>
+
+      <div class="form-group">
+        <label for="capsuleMessage">Pesan</label>
+        <textarea id="capsuleMessage" class="form-control" rows="6" placeholder="Tulis pesan untuk masa depan..."></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="capsuleDate">Tanggal Pembukaan</label>
+        <input type="datetime-local" id="capsuleDate" class="form-control">
+      </div>
+
+      <div class="form-group">
+        <label for="capsulePassword">Password (opsional)</label>
+        <input type="password" id="capsulePassword" class="form-control" placeholder="Kosongkan jika tidak perlu">
+      </div>
+
+      <button id="createCapsuleBtn" class="btn btn-primary">🚀 Simpan Capsule</button>
+    </div>
+
+    <!-- Capsules Grid -->
+    <div id="capsulesSection" class="hidden">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+        <h2>📦 Capsule Kamu</h2>
+        <button class="btn btn-primary" onclick="showCreateForm()">+ Capsule Baru</button>
+      </div>
+      <div id="capsuleGrid" class="capsule-grid"></div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="emptyState" class="card hidden" style="text-align: center;">
+      <div style="font-size: 4rem; margin-bottom: 1rem;">📦</div>
+      <h3>Belum ada capsule</h3>
+      <p style="color: #666; margin: 1rem 0;">Buat time capsule pertamamu!</p>
+      <button class="btn btn-primary" onclick="showCreateForm()">+ Buat Capsule</button>
+    </div>
+  </div>
+
+  <!-- View Modal -->
+  <div id="viewModal" class="modal">
+    <div class="modal-content">
+      <h3 id="modalTitle" style="margin-bottom: 1rem; color: var(--primary);"></h3>
+      <div id="modalMessage" style="white-space: pre-wrap; line-height: 1.8; margin-bottom: 1.5rem;"></div>
+      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+        <button class="btn btn-primary" onclick="shareToWA()">📱 WhatsApp</button>
+        <button class="btn btn-outline" onclick="copyLink()">🔗 Copy Link</button>
+      </div>
+      <button class="btn btn-outline" onclick="closeModal()" style="width: 100%;">Tutup</button>
+    </div>
+  </div>
+
+  <!-- Password Modal -->
+  <div id="passwordModal" class="modal">
+    <div class="modal-content" style="max-width: 400px;">
+      <h3 style="margin-bottom: 1rem;">🔒 Masukkan Password</h3>
+      <input type="password" id="capsulePasswordInput" class="form-control" placeholder="Password capsule" style="margin-bottom: 1rem;">
+      <button id="unlockBtn" class="btn btn-primary" style="width: 100%;">🔓 Buka</button>
+      <button class="btn btn-outline" onclick="closePasswordModal()" style="width: 100%; margin-top: 0.5rem;">Batal</button>
+    </div>
+  </div>
+
+  <script>
+    // ===== SUPABASE CONFIG =====
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // GANTI DENGAN URL SUPABASE KAMU
+    const SUPABASE_KEY = 'YOUR_SUPABASE_KEY'; // GANTI DENGAN KEY SUPABASE KAMU
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    // ===== STATE =====
+    let currentUser = null;
+    let capsules = [];
+    let isLoginMode = true;
+    let currentCapsuleId = null;
+
+    // ===== INIT =====
+    document.addEventListener('DOMContentLoaded', async () => {
+      // Check auth
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        currentUser = session.user;
+        showLoggedIn();
+        loadCapsules();
+      } else {
+        showLoggedOut();
+      }
+
+      // Theme
+      const savedTheme = localStorage.getItem('theme');
+      if (savedTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('themeToggle').textContent = '☀️';
+      }
+
+      // Set min date
+      const now = new Date();
+      now.setDate(now.getDate() + 1);
+      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+      document.getElementById('capsuleDate').min = now.toISOString().slice(0, 16);
+      document.getElementById('capsuleDate').value = now.toISOString().slice(0, 16);
+    });
+
+    // ===== AUTH =====
+    document.getElementById('authBtn').addEventListener('click', () => {
+      document.getElementById('authForms').classList.remove('hidden');
+      document.getElementById('createForm').classList.add('hidden');
+      document.getElementById('capsulesSection').classList.add('hidden');
+    });
+
+    document.getElementById('toggleAuth').addEventListener('click', (e) => {
+      e.preventDefault();
+      isLoginMode = !isLoginMode;
+      document.getElementById('authTitle').textContent = isLoginMode ? 'Login' : 'Daftar';
+      document.getElementById('authSubmitBtn').textContent = isLoginMode ? 'Login' : 'Daftar';
+      document.getElementById('nameGroup').classList.toggle('hidden', isLoginMode);
+      document.getElementById('toggleAuth').textContent = isLoginMode ? 'Belum punya akun? Daftar' : 'Sudah punya akun? Login';
+    });
+
+    document.getElementById('authSubmitBtn').addEventListener('click', async () => {
+      const email = document.getElementById('authEmail').value;
+      const password = document.getElementById('authPassword').value;
+      const name = document.getElementById('authName').value;
+
+      if (!email || !password) {
+        showAlert('Email dan password harus diisi!', 'error');
+        return;
+      }
+
+      if (!isLoginMode && !name) {
+        showAlert('Nama harus diisi!', 'error');
+        return;
+      }
+
+      if (isLoginMode) {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) {
+          showAlert(error.message, 'error');
+        } else {
+          currentUser = data.user;
+          showAlert('Login berhasil! 🎉', 'success');
+          showLoggedIn();
+          loadCapsules();
+        }
+      } else {
+        const { data, error } = await supabase.auth.signUp({ email, password });
+        if (error) {
+          showAlert(error.message, 'error');
+        } else {
+          // Save profile
+          await supabase.from('profiles').insert([{ id: data.user.id, email, name }]);
+          currentUser = data.user;
+          showAlert('Daftar berhasil! 🎉', 'success');
+          showLoggedIn();
+          loadCapsules();
+        }
+      }
+    });
+
+    async function logout() {
+      await supabase.auth.signOut();
+      currentUser = null;
+      showLoggedOut();
+    }
+
+    function showLoggedIn() {
+      document.getElementById('authBtn').textContent = 'Logout';
+      document.getElementById('authBtn').onclick = logout;
+      document.getElementById('userName').textContent = currentUser.email;
+      document.getElementById('userName').classList.remove('hidden');
+      document.getElementById('authForms').classList.add('hidden');
+      document.getElementById('createForm').classList.remove('hidden');
+      document.getElementById('capsulesSection').classList.remove('hidden');
+    }
+
+    function showLoggedOut() {
+      document.getElementById('authBtn').textContent = 'Login';
+      document.getElementById('authBtn').onclick = () => document.getElementById('authForms').classList.remove('hidden');
+      document.getElementById('userName').classList.add('hidden');
+      document.getElementById('authForms').classList.add('hidden');
+      document.getElementById('createForm').classList.add('hidden');
+      document.getElementById('capsulesSection').classList.add('hidden');
+    }
+
+    // ===== CAPSULES =====
+    async function loadCapsules() {
+      const { data, error } = await supabase
+        .from('capsules')
+        .select('*')
+        .eq('user_id', currentUser.id)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        showAlert('Gagal load capsules', 'error');
+        return;
+      }
+
+      capsules = data || [];
+      renderCapsules();
+    }
+
+    function renderCapsules() {
+      const grid = document.getElementById('capsuleGrid');
+      const emptyState = document.getElementById('emptyState');
+
+      if (capsules.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        document.getElementById('capsulesSection').classList.add('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      document.getElementById('capsulesSection').classList.remove('hidden');
+
+      grid.innerHTML = capsules.map(capsule => {
+        const openAt = new Date(capsule.open_at);
+        const now = new Date();
+        const isUnlocked = now >= openAt;
+        const timeLeft = getTimeLeft(openAt);
+
+        return `
+          <div class="capsule-card">
+            <span class="capsule-status ${isUnlocked ? 'status-unlocked' : 'status-locked'}">
+              ${isUnlocked ? '🔓 Terbuka' : '🔒 Terkunci'}
+            </span>
+            <h3 style="margin-bottom: 0.5rem;">${escapeHtml(capsule.title)}</h3>
+            <p style="color: #666; font-size: 0.9rem; margin-bottom: 1rem;">
+              ${isUnlocked ? 
+                `Dibuka: ${openAt.toLocaleDateString('id-ID')}` : 
+                `Akan terbuka: ${openAt.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}`
+              }
+            </p>
+            ${!isUnlocked && timeLeft ? `
+              <div class="countdown">
+                <div class="countdown-item">
+                  <span class="countdown-value">${timeLeft.days}</span>
+                  <span class="countdown-label">Hari</span>
+                </div>
+                <div class="countdown-item">
+                  <span class="countdown-value">${timeLeft.hours}</span>
+                  <span class="countdown-label">Jam</span>
+                </div>
+                <div class="countdown-item">
+                  <span class="countdown-value">${timeLeft.minutes}</span>
+                  <span class="countdown-label">Menit</span>
+                </div>
+              </div>
+            ` : ''}
+            <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+              ${isUnlocked ? `
+                <button class="btn btn-primary" onclick="viewCapsule('${capsule.id}')" style="flex: 1;">📖 Baca</button>
+              ` : `
+                <button class="btn btn-outline" onclick="previewCapsule('${capsule.id}')" style="flex: 1;">👁️ Preview</button>
+              `}
+              <button class="btn btn-danger" onclick="deleteCapsule('${capsule.id}')">🗑️</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function showCreateForm() {
+      document.getElementById('createForm').classList.remove('hidden');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    document.getElementById('createCapsuleBtn').addEventListener('click', async () => {
+      const title = document.getElementById('capsuleTitle').value.trim();
+      const message = document.getElementById('capsuleMessage').value.trim();
+      const openAt = document.getElementById('capsuleDate').value;
+      const password = document.getElementById('capsulePassword').value.trim();
+
+      if (!title || !message || !openAt) {
+        showAlert('Semua field harus diisi!', 'error');
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('capsules')
+        .insert([{
+          user_id: currentUser.id,
+          title,
+          message,
+          open_at: openAt,
+          password: password || null,
+          is_public: false
+        }]);
+
+      if (error) {
+        showAlert('Gagal buat capsule: ' + error.message, 'error');
+      } else {
+        showAlert('Capsule berhasil dibuat! 🎉', 'success');
+        document.getElementById('capsuleTitle').value = '';
+        document.getElementById('capsuleMessage').value = '';
+        document.getElementById('capsulePassword').value = '';
+        loadCapsules();
+      }
+    });
+
+    async function deleteCapsule(id) {
+      if (!confirm('Yakin ingin menghapus?')) return;
+      
+      const { error } = await supabase.from('capsules').delete().eq('id', id);
+      if (error) {
+        showAlert('Gagal hapus', 'error');
+      } else {
+        showAlert('Capsule dihapus', 'success');
+        loadCapsules();
+      }
+    }
+
+    function viewCapsule(id) {
+      const capsule = capsules.find(c => c.id === id);
+      if (!capsule) return;
+
+      if (capsule.password) {
+        currentCapsuleId = id;
+        document.getElementById('passwordModal').classList.add('active');
+      } else {
+        showCapsuleContent(capsule);
+      }
+    }
+
+    document.getElementById('unlockBtn').addEventListener('click', () => {
+      const password = document.getElementById('capsulePasswordInput').value;
+      const capsule = capsules.find(c => c.id === currentCapsuleId);
+      
+      if (capsule.password === password) {
+        showCapsuleContent(capsule);
+        closePasswordModal();
+      } else {
+        showAlert('Password salah!', 'error');
+      }
+    });
+
+    function showCapsuleContent(capsule) {
+      document.getElementById('modalTitle').textContent = capsule.title;
+      document.getElementById('modalMessage').textContent = capsule.message;
+      document.getElementById('viewModal').classList.add('active');
+    }
+
+    function previewCapsule(id) {
+      const capsule = capsules.find(c => c.id === id);
+      if (!capsule) return;
+      const openAt = new Date(capsule.open_at);
+      alert(`🔒 ${capsule.title}
+
+Akan terbuka: ${openAt.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`);
+    }
+
+    function closeModal() {
+      document.getElementById('viewModal').classList.remove('active');
+    }
+
+    function closePasswordModal() {
+      document.getElementById('passwordModal').classList.remove('active');
+      document.getElementById('capsulePasswordInput').value = '';
+      currentCapsuleId = null;
+    }
+
+    function shareToWA() {
+      const text = `🎉 Saya baru buka Time Capsule!`;
+      window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+    }
+
+    function copyLink() {
+      navigator.clipboard.writeText(window.location.href);
+      showAlert('Link disalin!', 'success');
+    }
+
+    // ===== UTILS =====
+    function getTimeLeft(openAt) {
+      const diff = openAt - new Date();
+      if (diff <= 0) return null;
+      return {
+        days: Math.floor(diff / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
+        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
+      };
+    }
+
+    function showAlert(message, type) {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+      setTimeout(() => alertBox.innerHTML = '', 3000);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Theme toggle
+    document.getElementById('themeToggle').addEventListener('click', () => {
+      document.body.classList.toggle('dark-mode');
+      const isDark = document.body.classList.contains('dark-mode');
+      document.getElementById('themeToggle').textContent = isDark ? '☀️' : '🌙';
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
+  </script>
+</body>
+</html>
