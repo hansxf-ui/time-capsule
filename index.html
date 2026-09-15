@@ -606,6 +606,14 @@
     maxlength="2000"
     placeholder="Write a message for the future..."
   ></textarea>
+  <button
+  id="contributionSubmitButton"
+  class="btn btn-primary"
+  type="button"
+  style="width: 100%; margin-top: 0.75rem;"
+>
+  Submit Message
+</button>
 
   <button
     id="contributionCancelButton"
@@ -1249,6 +1257,7 @@ Opens: ${openAt.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', m
     const contributionButton = document.getElementById('contributionButton');
 const contributionForm = document.getElementById('contributionForm');
 const contributionCancelButton = document.getElementById('contributionCancelButton');
+const contributionSubmitButton = document.getElementById('contributionSubmitButton');
 
 contributionButton.addEventListener('click', () => {
   contributionForm.classList.remove('hidden');
@@ -1259,6 +1268,58 @@ contributionCancelButton.addEventListener('click', () => {
   contributionForm.classList.add('hidden');
   contributionButton.classList.remove('hidden');
   document.getElementById('contributionMessage').value = '';
+});
+
+contributionSubmitButton.addEventListener('click', async () => {
+  const message = document.getElementById('contributionMessage').value.trim();
+  const params = new URLSearchParams(window.location.search);
+  const capsuleId = params.get('capsule');
+
+  if (!message) {
+    showAlert('Tulis pesan dulu.', 'error');
+    return;
+  }
+
+  if (!capsuleId) {
+    showAlert('Capsule tidak ditemukan dari link.', 'error');
+    return;
+  }
+
+  const { data: { session } } = await supabase.auth.getSession();
+
+  if (!session) {
+    showAlert('Login dulu untuk menambahkan pesan.', 'error');
+    return;
+  }
+
+  contributionSubmitButton.disabled = true;
+  contributionSubmitButton.textContent = 'Saving...';
+
+  const { error } = await supabase
+    .from('contributions')
+    .insert([{
+      capsule_id: capsuleId,
+      user_id: session.user.id,
+      message: message
+    }]);
+
+  contributionSubmitButton.disabled = false;
+  contributionSubmitButton.textContent = 'Submit Message';
+
+  if (error) {
+    if (error.code === '23505') {
+      showAlert('Kamu sudah mengirim satu pesan untuk capsule ini.', 'error');
+    } else {
+      showAlert('Gagal menyimpan pesan: ' + error.message, 'error');
+    }
+    return;
+  }
+
+  document.getElementById('contributionMessage').value = '';
+  contributionForm.classList.add('hidden');
+  contributionButton.classList.remove('hidden');
+
+  showAlert('Pesan berhasil ditambahkan dan dikunci! 🎉', 'success');
 });
   </script>
 </body>
