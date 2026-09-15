@@ -10,9 +10,6 @@
     :root {
       --primary: #6366f1;
       --primary-dark: #4f46e5;
-      --secondary: #f59e0b;
-      --success: #10b981;
-      --danger: #ef4444;
       --bg-light: #f8fafc;
       --bg-dark: #0f172a;
       --surface-light: #ffffff;
@@ -24,7 +21,6 @@
       --border-light: #e2e8f0;
       --border-dark: #334155;
       --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
-      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1);
       --radius: 16px;
       --radius-sm: 8px;
       --radius-lg: 24px;
@@ -91,14 +87,12 @@
       align-items: center;
       justify-content: center;
       color: white;
-      font-size: 1.25rem;
     }
 
     .nav-actions {
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      flex-shrink: 0;
     }
 
     .user-email {
@@ -131,7 +125,6 @@
       align-items: center;
       justify-content: center;
       gap: 0.5rem;
-      white-space: nowrap;
     }
 
     .btn-primary {
@@ -141,7 +134,6 @@
 
     .btn-primary:hover {
       transform: translateY(-2px);
-      box-shadow: var(--shadow-lg);
     }
 
     .btn-outline {
@@ -159,6 +151,11 @@
       background: var(--danger);
       color: white;
       padding: 0.5rem 1rem;
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
     }
 
     .btn-icon {
@@ -289,14 +286,17 @@
       font-weight: 700;
     }
 
-    .status-locked {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-    .status-unlocked {
-      background: #d1fae5;
-      color: #065f46;
+    .status-locked { background: #fef3c7; color: #92400e; }
+    .status-unlocked { background: #d1fae5; color: #065f46; }
+    .status-public { 
+      position: absolute;
+      bottom: 1rem;
+      right: 1rem;
+      padding: 0.25rem 0.75rem;
+      border-radius: 12px;
+      font-size: 0.7rem;
+      background: #dbeafe;
+      color: #1e40af;
     }
 
     .capsule-title {
@@ -370,14 +370,11 @@
       pointer-events: none;
     }
 
-    body.dark-mode .capsule-preview::after {
-      background: linear-gradient(transparent, var(--surface-dark));
-    }
-
     .capsule-actions {
       display: flex;
       gap: 0.5rem;
       margin-top: 1rem;
+      flex-wrap: wrap;
     }
 
     .modal {
@@ -456,27 +453,12 @@
       font-weight: 600;
     }
 
-    .alert-success {
-      background: #d1fae5;
-      color: #065f46;
-      border: 2px solid var(--success);
-    }
-
-    .alert-error {
-      background: #fee2e2;
-      color: #991b1b;
-      border: 2px solid var(--danger);
-    }
+    .alert-success { background: #d1fae5; color: #065f46; border: 2px solid #10b981; }
+    .alert-error { background: #fee2e2; color: #991b1b; border: 2px solid #ef4444; }
 
     .empty-state {
       text-align: center;
       padding: 4rem 2rem;
-    }
-
-    .empty-state-icon {
-      font-size: 5rem;
-      margin-bottom: 1.5rem;
-      opacity: 0.5;
     }
 
     .section-header {
@@ -494,6 +476,23 @@
       display: flex;
       align-items: center;
       gap: 0.75rem;
+    }
+
+    .public-view {
+      max-width: 600px;
+      margin: 2rem auto;
+      text-align: center;
+    }
+
+    .public-badge {
+      display: inline-block;
+      padding: 0.5rem 1rem;
+      background: #dbeafe;
+      color: #1e40af;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
     }
 
     .hidden { display: none !important; }
@@ -523,68 +522,95 @@
   <div class="container">
     <div id="alertBox"></div>
 
-    <div class="hero">
-      <h1>Save Messages for the Future</h1>
-      <p>Lock your memories and open them when the time is right</p>
-    </div>
-
-    <div id="authForms" class="card hidden" style="max-width: 450px; margin: 2rem auto;">
-      <h2 id="authTitle" style="text-align: center; margin-bottom: 0.5rem; color: var(--primary);">Login</h2>
-      <p style="text-align: center; color: var(--text-muted-light); margin-bottom: 2rem;">Welcome back!</p>
-      
-      <div class="form-group">
-        <label>Email</label>
-        <input type="email" id="authEmail" class="form-control" placeholder="you@example.com">
+    <!-- Public Capsule View -->
+    <div id="publicView" class="card public-view hidden">
+      <span class="public-badge">🌍 Public Capsule</span>
+      <div style="font-size: 4rem; margin-bottom: 1rem;">📦</div>
+      <h1 id="publicTitle" style="color: var(--primary); margin-bottom: 0.5rem;"></h1>
+      <p id="publicDate" style="color: var(--text-muted-light); margin-bottom: 2rem;"></p>
+      <div id="publicCountdown" style="margin-bottom: 2rem;"></div>
+      <div class="capsule-preview" style="background: var(--bg-light); padding: 2rem; border-radius: var(--radius); text-align: left; max-height: none;">
+        <p style="color: var(--text-muted-light); text-align: center;">
+          🔒 This capsule is locked. Message will be revealed when it unlocks!
+        </p>
       </div>
-      <div class="form-group">
-        <label>Password</label>
-        <input type="password" id="authPassword" class="form-control" placeholder="••••••••">
-      </div>
-      <div class="form-group hidden" id="nameGroup">
-        <label>Full Name</label>
-        <input type="text" id="authName" class="form-control" placeholder="John Doe">
-      </div>
-      <button id="authSubmitBtn" class="btn btn-primary" style="width: 100%;">Login</button>
-      <p style="text-align: center; margin-top: 1.5rem;">
-        <a href="#" id="toggleAuth" style="color: var(--primary);">No account? Sign up</a>
+      <p style="margin-top: 2rem; color: var(--text-muted-light); font-size: 0.9rem;">
+        Create your own time capsule at 
+        <a href="${window.location.origin}${window.location.pathname}" style="color: var(--primary);">Time Capsule</a>
       </p>
     </div>
 
-    <div id="createForm" class="card hidden">
-      <h2 style="margin-bottom: 1.5rem; color: var(--primary);">Create Time Capsule</h2>
-      <div class="form-group">
-        <label>Title</label>
-        <input type="text" id="capsuleTitle" class="form-control" placeholder="To my 30-year-old self">
+    <!-- App Content -->
+    <div id="appContent">
+      <div class="hero">
+        <h1>Save Messages for the Future</h1>
+        <p>Lock your memories and open them when the time is right</p>
       </div>
-      <div class="form-group">
-        <label>Message</label>
-        <textarea id="capsuleMessage" class="form-control" placeholder="Write your message..."></textarea>
-      </div>
-      <div class="form-group">
-        <label>Unlock Date</label>
-        <input type="datetime-local" id="capsuleDate" class="form-control">
-      </div>
-      <div class="form-group">
-        <label>Password (optional)</label>
-        <input type="password" id="capsulePassword" class="form-control" placeholder="Leave empty">
-      </div>
-      <button id="createCapsuleBtn" class="btn btn-primary" style="width: 100%;">Create Capsule</button>
-    </div>
 
-    <div id="capsulesSection" class="hidden">
-      <div class="section-header">
-        <h2 class="section-title">Your Capsules</h2>
-        <button class="btn btn-primary" onclick="showCreateForm()">+ New Capsule</button>
+      <div id="authForms" class="card hidden" style="max-width: 450px; margin: 2rem auto;">
+        <h2 id="authTitle" style="text-align: center; margin-bottom: 0.5rem; color: var(--primary);">Login</h2>
+        <p style="text-align: center; color: var(--text-muted-light); margin-bottom: 2rem;">Welcome back!</p>
+        
+        <div class="form-group">
+          <label>Email</label>
+          <input type="email" id="authEmail" class="form-control" placeholder="you@example.com">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="authPassword" class="form-control" placeholder="••••••••">
+        </div>
+        <div class="form-group hidden" id="nameGroup">
+          <label>Full Name</label>
+          <input type="text" id="authName" class="form-control" placeholder="John Doe">
+        </div>
+        <button id="authSubmitBtn" class="btn btn-primary" style="width: 100%;">Login</button>
+        <p style="text-align: center; margin-top: 1.5rem;">
+          <a href="#" id="toggleAuth" style="color: var(--primary);">No account? Sign up</a>
+        </p>
       </div>
-      <div id="capsuleGrid" class="capsule-grid"></div>
-    </div>
 
-    <div id="emptyState" class="card hidden">
-      <div class="empty-state">
-        <div class="empty-state-icon">📦</div>
-        <h3>No Capsules Yet</h3>
-        <p style="color: var(--text-muted-light); margin: 1rem 0;">Create your first time capsule!</p>
-        <button class="btn btn-primary" onclick="showCreateForm()">Create Capsule</button>
+      <div id="createForm" class="card hidden">
+        <h2 style="margin-bottom: 1.5rem; color: var(--primary);">Create Time Capsule</h2>
+        <div class="form-group">
+          <label>Title</label>
+          <input type="text" id="capsuleTitle" class="form-control" placeholder="To my 30-year-old self">
+        </div>
+        <div class="form-group">
+          <label>Message</label>
+          <textarea id="capsuleMessage" class="form-control" placeholder="Write your message..."></textarea>
+        </div>
+        <div class="form-group">
+          <label>Unlock Date</label>
+          <input type="datetime-local" id="capsuleDate" class="form-control">
+        </div>
+        <div class="form-group">
+          <label>Password (optional)</label>
+          <input type="password" id="capsulePassword" class="form-control" placeholder="Leave empty">
+        </div>
+        <div class="form-group">
+          <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
+            <input type="checkbox" id="isPublic" style="width: auto;">
+            <span>Make this capsule public (others can view with link)</span>
+          </label>
+        </div>
+        <button id="createCapsuleBtn" class="btn btn-primary" style="width: 100%;">Create Capsule</button>
+      </div>
+
+      <div id="capsulesSection" class="hidden">
+        <div class="section-header">
+          <h2 class="section-title">Your Capsules</h2>
+          <button class="btn btn-primary" onclick="showCreateForm()">+ New Capsule</button>
+        </div>
+        <div id="capsuleGrid" class="capsule-grid"></div>
+      </div>
+
+      <div id="emptyState" class="card hidden">
+        <div class="empty-state">
+          <div style="font-size: 5rem; margin-bottom: 1rem; opacity: 0.5;">📦</div>
+          <h3>No Capsules Yet</h3>
+          <p style="color: var(--text-muted-light); margin: 1rem 0;">Create your first time capsule!</p>
+          <button class="btn btn-primary" onclick="showCreateForm()">Create Capsule</button>
+        </div>
       </div>
     </div>
   </div>
@@ -628,6 +654,10 @@
     let currentCapsuleId = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
+      // Check public capsule first
+      await checkPublicCapsule();
+
+      // Check auth
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         currentUser = session.user;
@@ -637,12 +667,14 @@
         showLoggedOut();
       }
 
+      // Theme
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
         document.getElementById('themeToggle').textContent = '☀️';
       }
 
+      // Min date
       const now = new Date();
       now.setDate(now.getDate() + 1);
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -650,6 +682,65 @@
       document.getElementById('capsuleDate').value = now.toISOString().slice(0, 16);
     });
 
+    // ===== PUBLIC CAPSULE VIEW =====
+    async function checkPublicCapsule() {
+      const params = new URLSearchParams(window.location.search);
+      const capsuleId = params.get('capsule');
+      
+      if (capsuleId) {
+        const { data: capsule, error } = await supabase
+          .from('capsules')
+          .select('*')
+          .eq('id', capsuleId)
+          .eq('is_public', true)
+          .single();
+
+        if (capsule && !error) {
+          showPublicView(capsule);
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function showPublicView(capsule) {
+      document.getElementById('appContent').classList.add('hidden');
+      document.getElementById('publicView').classList.remove('hidden');
+      document.querySelector('.navbar').style.display = 'none';
+
+      document.getElementById('publicTitle').textContent = capsule.title;
+      
+      const openAt = new Date(capsule.open_at);
+      const now = new Date();
+      const isUnlocked = now >= openAt;
+
+      document.getElementById('publicDate').textContent = 
+        `Created: ${new Date(capsule.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} | Opens: ${openAt.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+
+      if (!isUnlocked) {
+        const timeLeft = getTimeLeft(openAt);
+        if (timeLeft) {
+          document.getElementById('publicCountdown').innerHTML = `
+            <div class="countdown" style="justify-content: center;">
+              <div class="countdown-item">
+                <span class="countdown-value">${timeLeft.days}</span>
+                <span class="countdown-label">Days</span>
+              </div>
+              <div class="countdown-item">
+                <span class="countdown-value">${timeLeft.hours}</span>
+                <span class="countdown-label">Hours</span>
+              </div>
+              <div class="countdown-item">
+                <span class="countdown-value">${timeLeft.minutes}</span>
+                <span class="countdown-label">Mins</span>
+              </div>
+            </div>
+          `;
+        }
+      }
+    }
+
+    // ===== AUTH =====
     document.getElementById('authBtn').addEventListener('click', () => {
       document.getElementById('authForms').classList.remove('hidden');
       document.getElementById('createForm').classList.add('hidden');
@@ -660,8 +751,7 @@
       e.preventDefault();
       isLoginMode = !isLoginMode;
       document.getElementById('authTitle').textContent = isLoginMode ? 'Login' : 'Sign Up';
-      const btnText = document.querySelector('#authSubmitBtn');
-      btnText.textContent = isLoginMode ? 'Login' : 'Sign Up';
+      document.querySelector('#authSubmitBtn').textContent = isLoginMode ? 'Login' : 'Sign Up';
       document.getElementById('nameGroup').classList.toggle('hidden', isLoginMode);
       document.getElementById('toggleAuth').textContent = isLoginMode ? "No account? Sign up" : 'Already have an account? Login';
     });
@@ -734,6 +824,7 @@
       document.getElementById('capsulesSection').classList.add('hidden');
     }
 
+    // ===== CAPSULES =====
     async function loadCapsules() {
       const { data, error } = await supabase
         .from('capsules')
@@ -770,6 +861,7 @@
         const now = new Date();
         const isUnlocked = now >= openAt;
         const timeLeft = getTimeLeft(openAt);
+        const shareUrl = `${window.location.origin}${window.location.pathname}?capsule=${capsule.id}`;
 
         return `
           <div class="capsule-card">
@@ -808,8 +900,18 @@
               ` : `
                 <button class="btn btn-outline" onclick="previewCapsule('${capsule.id}')" style="flex: 1;">Preview</button>
               `}
+              ${capsule.is_public ? `
+                <button class="btn btn-success" onclick="copyShareLink('${capsule.id}', '${shareUrl}')" title="Copy share link">
+                  🔗 Share
+                </button>
+              ` : `
+                <button class="btn btn-outline" onclick="makePublic('${capsule.id}')" title="Make public">
+                  🌍 Make Public
+                </button>
+              `}
               <button class="btn btn-danger" onclick="deleteCapsule('${capsule.id}')">Delete</button>
             </div>
+            ${capsule.is_public ? `<span class="status-public">🌍 Public</span>` : ''}
           </div>
         `;
       }).join('');
@@ -826,6 +928,7 @@
       const message = document.getElementById('capsuleMessage').value.trim();
       const openAt = document.getElementById('capsuleDate').value;
       const password = document.getElementById('capsulePassword').value.trim();
+      const isPublic = document.getElementById('isPublic').checked;
 
       if (!title || !message || !openAt) {
         showAlert('Please fill in all required fields!', 'error');
@@ -840,7 +943,7 @@
           message,
           open_at: openAt,
           password: password || null,
-          is_public: false
+          is_public: isPublic
         }]);
 
       if (error) {
@@ -850,6 +953,7 @@
         document.getElementById('capsuleTitle').value = '';
         document.getElementById('capsuleMessage').value = '';
         document.getElementById('capsulePassword').value = '';
+        document.getElementById('isPublic').checked = false;
         document.getElementById('createForm').classList.add('hidden');
         document.getElementById('capsulesSection').classList.remove('hidden');
         await loadCapsules();
@@ -867,6 +971,27 @@
       }
     }
 
+    async function makePublic(id) {
+      if (!confirm('Make this capsule public? Others can view it with the link.')) return;
+      
+      const { error } = await supabase
+        .from('capsules')
+        .update({ is_public: true })
+        .eq('id', id);
+
+      if (error) {
+        showAlert('Failed: ' + error.message, 'error');
+      } else {
+        showAlert('Capsule is now public! 🌍', 'success');
+        await loadCapsules();
+      }
+    }
+
+    function copyShareLink(id, url) {
+      navigator.clipboard.writeText(url);
+      showAlert('Link copied! Share it with anyone 🎉', 'success');
+    }
+
     function viewCapsule(id) {
       const capsule = capsules.find(c => c.id === id);
       if (!capsule) return;
@@ -881,7 +1006,7 @@
     document.getElementById('unlockBtn').addEventListener('click', () => {
       const password = document.getElementById('capsulePasswordInput').value;
       const capsule = capsules.find(c => c.id === currentCapsuleId);
-      if (capsule.password === password) {
+      if (capsule && capsule.password === password) {
         showCapsuleContent(capsule);
         closePasswordModal();
       } else {
