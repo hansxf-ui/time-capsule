@@ -6,6 +6,7 @@
   <title>⏰ Time Capsule - Save Messages for the Future</title>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
   <style>
     :root {
       --primary: #6366f1;
@@ -127,12 +128,18 @@
       gap: 0.5rem;
     }
 
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
     .btn-primary {
       background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       color: white;
     }
 
-    .btn-primary:hover {
+    .btn-primary:hover:not(:disabled) {
       transform: translateY(-2px);
     }
 
@@ -288,7 +295,8 @@
 
     .status-locked { background: #fef3c7; color: #92400e; }
     .status-unlocked { background: #d1fae5; color: #065f46; }
-    .status-public { 
+
+    .status-public {
       position: absolute;
       bottom: 1rem;
       right: 1rem;
@@ -410,7 +418,7 @@
     .modal-content {
       background: var(--surface-light);
       border-radius: var(--radius-lg);
-      padding: 2.5rem;
+      padding: 2rem;
       max-width: 600px;
       width: 90%;
       max-height: 80vh;
@@ -442,6 +450,7 @@
     .modal-close {
       background: transparent;
       border: none;
+      color: inherit;
       font-size: 1.5rem;
       cursor: pointer;
       width: 40px;
@@ -519,6 +528,10 @@
       border-top: 1px solid var(--border-light);
     }
 
+    body.dark-mode .contributors-section {
+      border-top-color: var(--border-dark);
+    }
+
     .contributor-item {
       background: var(--bg-light);
       padding: 1rem;
@@ -540,6 +553,20 @@
     .contributor-message {
       color: var(--text-light);
       font-size: 0.95rem;
+      white-space: pre-wrap;
+    }
+
+    body.dark-mode .contributor-message {
+      color: var(--text-dark);
+    }
+
+    .contribution-box {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      border: 2px dashed var(--primary);
+      border-radius: var(--radius);
+      background: rgba(99, 102, 241, 0.06);
+      text-align: center;
     }
 
     .hidden { display: none !important; }
@@ -548,47 +575,63 @@
       .hero h1 { font-size: 2rem; }
       .capsule-grid { grid-template-columns: 1fr; }
       .user-email { display: none; }
+      .modal-content { padding: 1.5rem; }
     }
   </style>
 </head>
+
 <body>
   <nav class="navbar">
     <div class="navbar-content">
-      <a href="#" class="logo">
+      <a href="./" class="logo">
         <div class="logo-icon">⏰</div>
         <span>Time Capsule</span>
       </a>
+
       <div class="nav-actions">
-        <button class="btn btn-icon theme-toggle" id="themeToggle">🌙</button>
+        <button class="btn btn-icon theme-toggle" id="themeToggle" type="button">🌙</button>
         <span id="userName" class="user-email hidden"></span>
-        <button id="authBtn" class="btn btn-primary">Login</button>
+        <button id="authBtn" class="btn btn-primary" type="button">Login</button>
       </div>
     </div>
   </nav>
 
-  <div class="container">
+  <main class="container">
     <div id="alertBox"></div>
 
-    <!-- Public Capsule View -->
-    <div id="publicView" class="card public-view hidden">
-      <span class="public-badge">🌍 Public Capsule</span>
+    <section id="publicView" class="card public-view hidden">
+      <span class="public-badge">🌍 Public Collaborative Capsule</span>
       <div style="font-size: 4rem; margin-bottom: 1rem;">📦</div>
       <h1 id="publicTitle" style="color: var(--primary); margin-bottom: 0.5rem;"></h1>
-      <p id="publicDate" style="color: var(--text-muted-light); margin-bottom: 2rem;"></p>
-      <div id="publicCountdown" style="margin-bottom: 2rem;"></div>
-      <div class="capsule-preview" style="background: var(--bg-light); padding: 2rem; border-radius: var(--radius); text-align: left; max-height: none;">
+      <p id="publicDate" style="color: var(--text-muted-light); margin-bottom: 1rem;"></p>
+      <div id="publicCountdown"></div>
+
+      <div id="publicLockedMessage" class="capsule-preview" style="background: var(--bg-light); padding: 2rem; border-radius: var(--radius); text-align: left; max-height: none;">
         <p style="color: var(--text-muted-light); text-align: center;">
-          🔒 This capsule is locked. Message will be revealed when it unlocks!
+          🔒 This capsule is locked. All messages will be revealed when it unlocks.
         </p>
       </div>
-      <p style="margin-top: 2rem; color: var(--text-muted-light); font-size: 0.9rem;">
-        Create your own time capsule at 
-        <a href="https://hansxf-ui.github.io/time-capsule/" style="color: var(--primary);">Time Capsule</a>
-      </p>
-    </div>
 
-    <!-- App Content -->
-    <div id="appContent">
+      <div id="publicUnlockedContent" class="hidden" style="text-align: left;"></div>
+
+      <div id="publicContributionArea" class="contribution-box">
+        <div style="font-size: 2rem; margin-bottom: 0.5rem;">✍️</div>
+        <p style="font-weight: 700; color: var(--primary); margin-bottom: 0.5rem;">Leave a message for the future</p>
+        <p style="font-size: 0.9rem; color: var(--text-muted-light); margin-bottom: 1rem;">
+          Login dulu, lalu tulis satu pesan untuk capsule ini.
+        </p>
+        <button id="openContributionBtn" class="btn btn-primary" type="button">
+          Add Your Message
+        </button>
+      </div>
+
+      <p style="margin-top: 2rem; color: var(--text-muted-light); font-size: 0.9rem;">
+        Create your own time capsule at
+        <a href="./" style="color: var(--primary);">Time Capsule</a>
+      </p>
+    </section>
+
+    <section id="appContent">
       <div class="hero">
         <h1>Save Messages for the Future</h1>
         <p>Lock your memories and open them when the time is right</p>
@@ -596,21 +639,25 @@
 
       <div id="authForms" class="card hidden" style="max-width: 450px; margin: 2rem auto;">
         <h2 id="authTitle" style="text-align: center; margin-bottom: 0.5rem; color: var(--primary);">Login</h2>
-        <p style="text-align: center; color: var(--text-muted-light); margin-bottom: 2rem;">Welcome back!</p>
-        
+        <p id="authSubtitle" style="text-align: center; color: var(--text-muted-light); margin-bottom: 2rem;">Welcome back!</p>
+
         <div class="form-group">
-          <label>Email</label>
+          <label for="authEmail">Email</label>
           <input type="email" id="authEmail" class="form-control" placeholder="you@example.com">
         </div>
+
         <div class="form-group">
-          <label>Password</label>
+          <label for="authPassword">Password</label>
           <input type="password" id="authPassword" class="form-control" placeholder="••••••••">
         </div>
+
         <div class="form-group hidden" id="nameGroup">
-          <label>Full Name</label>
-          <input type="text" id="authName" class="form-control" placeholder="John Doe">
+          <label for="authName">Full Name</label>
+          <input type="text" id="authName" class="form-control" placeholder="Your name">
         </div>
-        <button id="authSubmitBtn" class="btn btn-primary" style="width: 100%;">Login</button>
+
+        <button id="authSubmitBtn" class="btn btn-primary" style="width: 100%;" type="button">Login</button>
+
         <p style="text-align: center; margin-top: 1.5rem;">
           <a href="#" id="toggleAuth" style="color: var(--primary);">No account? Sign up</a>
         </p>
@@ -618,235 +665,473 @@
 
       <div id="createForm" class="card hidden">
         <h2 style="margin-bottom: 1.5rem; color: var(--primary);">Create Time Capsule</h2>
+
         <div class="form-group">
-          <label>Title</label>
+          <label for="capsuleTitle">Title</label>
           <input type="text" id="capsuleTitle" class="form-control" placeholder="To my 30-year-old self">
         </div>
+
         <div class="form-group">
-          <label>Message</label>
+          <label for="capsuleMessage">Your Message</label>
           <textarea id="capsuleMessage" class="form-control" placeholder="Write your message..."></textarea>
         </div>
+
         <div class="form-group">
-          <label>Upload Photo (optional)</label>
-          <input type="file" id="capsuleImage" class="form-control" accept="image/*">
-          <p style="font-size: 0.85rem; color: var(--text-muted-light); margin-top: 0.5rem;">Max 5MB. JPG, PNG, or WebP</p>
+          <label for="capsuleImage">Upload Photo (optional)</label>
+          <input type="file" id="capsuleImage" class="form-control" accept="image/jpeg,image/png,image/webp">
+          <p style="font-size: 0.85rem; color: var(--text-muted-light); margin-top: 0.5rem;">
+            JPG, PNG, or WebP. Maximum 5 MB.
+          </p>
         </div>
+
         <div class="form-group">
-          <label>Unlock Date</label>
+          <label for="capsuleDate">Unlock Date</label>
           <input type="datetime-local" id="capsuleDate" class="form-control">
         </div>
+
         <div class="form-group">
-          <label>Password (optional)</label>
-          <input type="password" id="capsulePassword" class="form-control" placeholder="Leave empty">
+          <label for="capsulePassword">Password (optional)</label>
+          <input type="password" id="capsulePassword" class="form-control" placeholder="Leave empty if not needed">
         </div>
+
         <div class="form-group">
           <label style="display: flex; align-items: center; gap: 0.5rem; cursor: pointer;">
             <input type="checkbox" id="isPublic" style="width: auto;">
-            <span>Make this capsule public (others can view with link)</span>
+            <span>Make this capsule public and allow contributions</span>
           </label>
         </div>
-        <button id="createCapsuleBtn" class="btn btn-primary" style="width: 100%;">Create Capsule</button>
+
+        <button id="createCapsuleBtn" class="btn btn-primary" style="width: 100%;" type="button">
+          Create Capsule
+        </button>
       </div>
 
-      <div id="capsulesSection" class="hidden">
+      <section id="capsulesSection" class="hidden">
         <div class="section-header">
           <h2 class="section-title">Your Capsules</h2>
-          <button class="btn btn-primary" onclick="showCreateForm()">+ New Capsule</button>
+          <button class="btn btn-primary" type="button" onclick="showCreateForm()">+ New Capsule</button>
         </div>
         <div id="capsuleGrid" class="capsule-grid"></div>
-      </div>
+      </section>
 
       <div id="emptyState" class="card hidden">
         <div class="empty-state">
           <div style="font-size: 5rem; margin-bottom: 1rem; opacity: 0.5;">📦</div>
           <h3>No Capsules Yet</h3>
           <p style="color: var(--text-muted-light); margin: 1rem 0;">Create your first time capsule!</p>
-          <button class="btn btn-primary" onclick="showCreateForm()">Create Capsule</button>
+          <button class="btn btn-primary" type="button" onclick="showCreateForm()">Create Capsule</button>
         </div>
       </div>
-    </div>
-  </div>
+    </section>
+  </main>
 
-  <!-- View Modal -->
   <div id="viewModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h3 id="modalTitle" class="modal-title"></h3>
-        <button class="modal-close" onclick="closeModal()">×</button>
+        <button class="modal-close" type="button" onclick="closeModal()">×</button>
       </div>
+
       <img id="modalImage" class="modal-image hidden" src="" alt="Capsule photo">
       <div id="modalMessage" class="modal-message"></div>
-      
-      <!-- Contributors -->
+
       <div id="contributorsSection" class="contributors-section hidden">
         <h4 style="margin-bottom: 1rem; color: var(--primary);">👥 Contributors</h4>
         <div id="contributorsList"></div>
       </div>
 
       <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem;">
-        <button class="btn btn-primary" onclick="shareToWA()">Share on WhatsApp</button>
-        <button class="btn btn-outline" onclick="copyLink()">Copy Link</button>
+        <button class="btn btn-primary" type="button" onclick="sendEmailReminder()">📧 Email Me</button>
+        <button class="btn btn-primary" type="button" onclick="shareToWA()">Share on WhatsApp</button>
+        <button class="btn btn-outline" type="button" onclick="copyLink()">Copy Link</button>
       </div>
-      <button class="btn btn-outline" onclick="closeModal()" style="width: 100%; margin-top: 0.75rem;">Close</button>
+
+      <button class="btn btn-outline" type="button" onclick="closeModal()" style="width: 100%; margin-top: 0.75rem;">Close</button>
     </div>
   </div>
 
-  <!-- Password Modal -->
   <div id="passwordModal" class="modal">
     <div class="modal-content" style="max-width: 400px;">
       <div class="modal-header">
         <h3 class="modal-title">🔒 Enter Password</h3>
-        <button class="modal-close" onclick="closePasswordModal()">×</button>
+        <button class="modal-close" type="button" onclick="closePasswordModal()">×</button>
       </div>
+
       <input type="password" id="capsulePasswordInput" class="form-control" placeholder="Password" style="margin-bottom: 1rem;">
-      <button id="unlockBtn" class="btn btn-primary" style="width: 100%;">Unlock</button>
-      <button class="btn btn-outline" onclick="closePasswordModal()" style="width: 100%; margin-top: 0.75rem;">Cancel</button>
+      <button id="unlockBtn" class="btn btn-primary" type="button" style="width: 100%;">Unlock</button>
+      <button class="btn btn-outline" type="button" onclick="closePasswordModal()" style="width: 100%; margin-top: 0.75rem;">Cancel</button>
+    </div>
+  </div>
+
+  <div id="contributionModal" class="modal">
+    <div class="modal-content" style="max-width: 500px;">
+      <div class="modal-header">
+        <h3 class="modal-title">✍️ Add Your Message</h3>
+        <button class="modal-close" type="button" onclick="closeContributionModal()">×</button>
+      </div>
+
+      <p style="color: var(--text-muted-light); margin-bottom: 1rem;">
+        Pesanmu akan dikunci dan baru terlihat saat capsule dibuka.
+      </p>
+
+      <div class="form-group">
+        <label for="contributionMessage">Your Message</label>
+        <textarea id="contributionMessage" class="form-control" maxlength="2000" placeholder="Write a message for the future..."></textarea>
+      </div>
+
+      <button id="submitContributionBtn" class="btn btn-primary" type="button" style="width: 100%;">
+        Submit Message
+      </button>
+
+      <button class="btn btn-outline" type="button" onclick="closeContributionModal()" style="width: 100%; margin-top: 0.75rem;">
+        Cancel
+      </button>
     </div>
   </div>
 
   <script>
     const SUPABASE_URL = 'https://lpuvkrbdctankydvmzpy.supabase.co';
     const SUPABASE_KEY = 'sb_publishable_XOX5zgpPR4GUL6EIJf0xRg_GaRPRzak';
-    
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     let currentUser = null;
     let capsules = [];
     let isLoginMode = true;
     let currentCapsuleId = null;
+    let currentViewedCapsule = null;
+    let currentPublicCapsule = null;
+    let authReturnToPublic = false;
 
     document.addEventListener('DOMContentLoaded', async () => {
-      await checkPublicCapsule();
+      applySavedTheme();
+
+      const isPublicPage = await checkPublicCapsule();
+      if (isPublicPage) {
+        const { data: { session } } = await supabase.auth.getSession();
+        currentUser = session ? session.user : null;
+        updateNavbar();
+        return;
+      }
 
       const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        currentUser = session.user;
+      currentUser = session ? session.user : null;
+      updateNavbar();
+
+      if (currentUser) {
         showLoggedIn();
         await loadCapsules();
       } else {
         showLoggedOut();
       }
 
+      setDefaultUnlockDate();
+    });
+
+    function applySavedTheme() {
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
         document.getElementById('themeToggle').textContent = '☀️';
       }
+    }
 
+    function setDefaultUnlockDate() {
       const now = new Date();
       now.setDate(now.getDate() + 1);
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      document.getElementById('capsuleDate').min = now.toISOString().slice(0, 16);
-      document.getElementById('capsuleDate').value = now.toISOString().slice(0, 16);
-    });
-
-    // ===== PUBLIC CAPSULE VIEW =====
-    async function checkPublicCapsule() {
-      const params = new URLSearchParams(window.location.search);
-      const capsuleId = params.get('capsule');
-      
-      if (capsuleId) {
-        const { data: capsule, error } = await supabase
-          .from('capsules')
-          .select('*')
-          .eq('id', capsuleId)
-          .eq('is_public', true)
-          .single();
-
-        if (capsule && !error) {
-          showPublicView(capsule);
-          return true;
-        }
-      }
-      return false;
+      const dateInput = document.getElementById('capsuleDate');
+      dateInput.min = now.toISOString().slice(0, 16);
+      dateInput.value = now.toISOString().slice(0, 16);
     }
 
-    function showPublicView(capsule) {
+    async function checkPublicCapsule() {
+      const capsuleId = new URLSearchParams(window.location.search).get('capsule');
+      if (!capsuleId) return false;
+
+      const { data: capsule, error } = await supabase
+        .from('capsules')
+        .select('*')
+        .eq('id', capsuleId)
+        .eq('is_public', true)
+        .single();
+
+      if (error || !capsule) {
+        showAlert('Public capsule not found.', 'error');
+        return false;
+      }
+
+      currentPublicCapsule = capsule;
+      showPublicView(capsule);
+      return true;
+    }
+
+    async function showPublicView(capsule) {
       document.getElementById('appContent').classList.add('hidden');
-      document.querySelector('.navbar').style.display = 'none';
       document.getElementById('publicView').classList.remove('hidden');
 
       document.getElementById('publicTitle').textContent = capsule.title;
-      
-      const openAt = new Date(capsule.open_at);
-      const now = new Date();
-      const isUnlocked = now >= openAt;
 
-      document.getElementById('publicDate').textContent = 
-        `Created: ${new Date(capsule.created_at).toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })} | Opens: ${openAt.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+      const openAt = new Date(capsule.open_at);
+      const isUnlocked = new Date() >= openAt;
+
+      document.getElementById('publicDate').textContent =
+        `Opens: ${openAt.toLocaleDateString('en-US', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit'
+        })}`;
+
+      const countdown = document.getElementById('publicCountdown');
+      const lockedMessage = document.getElementById('publicLockedMessage');
+      const unlockedContent = document.getElementById('publicUnlockedContent');
+      const contributionArea = document.getElementById('publicContributionArea');
 
       if (!isUnlocked) {
         const timeLeft = getTimeLeft(openAt);
-        if (timeLeft) {
-          document.getElementById('publicCountdown').innerHTML = `
-            <div class="countdown" style="justify-content: center;">
-              <div class="countdown-item">
-                <span class="countdown-value">${timeLeft.days}</span>
-                <span class="countdown-label">Days</span>
-              </div>
-              <div class="countdown-item">
-                <span class="countdown-value">${timeLeft.hours}</span>
-                <span class="countdown-label">Hours</span>
-              </div>
-              <div class="countdown-item">
-                <span class="countdown-value">${timeLeft.minutes}</span>
-                <span class="countdown-label">Mins</span>
-              </div>
+
+        countdown.innerHTML = timeLeft ? `
+          <div class="countdown">
+            <div class="countdown-item">
+              <span class="countdown-value">${timeLeft.days}</span>
+              <span class="countdown-label">Days</span>
             </div>
-          `;
-        }
+            <div class="countdown-item">
+              <span class="countdown-value">${timeLeft.hours}</span>
+              <span class="countdown-label">Hours</span>
+            </div>
+            <div class="countdown-item">
+              <span class="countdown-value">${timeLeft.minutes}</span>
+              <span class="countdown-label">Mins</span>
+            </div>
+          </div>
+        ` : '';
+
+        lockedMessage.classList.remove('hidden');
+        unlockedContent.classList.add('hidden');
+        contributionArea.classList.remove('hidden');
+        document.getElementById('openContributionBtn').onclick = openContributionModal;
+      } else {
+        countdown.innerHTML = '';
+        lockedMessage.classList.add('hidden');
+        contributionArea.classList.add('hidden');
+
+        unlockedContent.classList.remove('hidden');
+        unlockedContent.innerHTML = `
+          ${capsule.image_url ? `<img src="${escapeAttribute(capsule.image_url)}" class="modal-image" alt="Capsule photo">` : ''}
+          <h3 style="margin-bottom: 1rem; color: var(--primary);">Message from the capsule</h3>
+          <div class="modal-message">${escapeHtml(capsule.message)}</div>
+          <div id="publicContributorsSection" class="contributors-section hidden">
+            <h4 style="margin-bottom: 1rem; color: var(--primary);">👥 Contributors</h4>
+            <div id="publicContributorsList"></div>
+          </div>
+        `;
+
+        await loadPublicContributors(capsule.id);
       }
     }
 
-    // ===== AUTH =====
-    document.getElementById('authBtn').addEventListener('click', () => {
-      document.getElementById('authForms').classList.remove('hidden');
-      document.getElementById('createForm').classList.add('hidden');
-      document.getElementById('capsulesSection').classList.add('hidden');
+    async function openContributionModal() {
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        authReturnToPublic = true;
+        document.getElementById('publicView').classList.add('hidden');
+        document.getElementById('appContent').classList.remove('hidden');
+        document.getElementById('authForms').classList.remove('hidden');
+        document.getElementById('createForm').classList.add('hidden');
+        document.getElementById('capsulesSection').classList.add('hidden');
+        showAlert('Login atau Sign Up dulu untuk menulis pesan.', 'error');
+        return;
+      }
+
+      currentUser = session.user;
+      document.getElementById('contributionModal').classList.add('active');
+    }
+
+    function closeContributionModal() {
+      document.getElementById('contributionModal').classList.remove('active');
+      document.getElementById('contributionMessage').value = '';
+    }
+
+    document.getElementById('submitContributionBtn').addEventListener('click', async () => {
+      const message = document.getElementById('contributionMessage').value.trim();
+
+      if (!currentPublicCapsule) {
+        showAlert('Capsule tidak ditemukan.', 'error');
+        return;
+      }
+
+      if (!message) {
+        showAlert('Tulis pesanmu dulu.', 'error');
+        return;
+      }
+
+      const { data: { session } } = await supabase.auth.getSession();
+
+      if (!session) {
+        showAlert('Login dulu untuk menulis pesan.', 'error');
+        return;
+      }
+
+      const submitButton = document.getElementById('submitContributionBtn');
+      submitButton.disabled = true;
+      submitButton.textContent = 'Saving...';
+
+      const { error } = await supabase
+        .from('contributions')
+        .insert({
+          capsule_id: currentPublicCapsule.id,
+          user_id: session.user.id,
+          message
+        });
+
+      submitButton.disabled = false;
+      submitButton.textContent = 'Submit Message';
+
+      if (error) {
+        if (error.code === '23505') {
+          showAlert('Kamu sudah pernah mengirim pesan untuk capsule ini.', 'error');
+        } else {
+          showAlert('Gagal menyimpan pesan: ' + error.message, 'error');
+        }
+        return;
+      }
+
+      closeContributionModal();
+      showAlert('Pesanmu berhasil dikunci! 🎉', 'success');
     });
 
-    document.getElementById('toggleAuth').addEventListener('click', (e) => {
-      e.preventDefault();
+    async function loadPublicContributors(capsuleId) {
+      const { data: contributors, error } = await supabase
+        .from('contributions')
+        .select('message, created_at, user_id')
+        .eq('capsule_id', capsuleId)
+        .order('created_at', { ascending: true });
+
+      if (error) return;
+
+      const section = document.getElementById('publicContributorsSection');
+      const list = document.getElementById('publicContributorsList');
+
+      if (!section || !list || !contributors || contributors.length === 0) return;
+
+      section.classList.remove('hidden');
+      list.innerHTML = contributors.map((contributor, index) => `
+        <div class="contributor-item">
+          <div class="contributor-name">Contributor ${index + 1}</div>
+          <div class="contributor-message">${escapeHtml(contributor.message)}</div>
+        </div>
+      `).join('');
+    }
+
+    document.getElementById('authBtn').addEventListener('click', () => {
+      if (currentUser) {
+        logout();
+      } else {
+        authReturnToPublic = false;
+        document.getElementById('authForms').classList.remove('hidden');
+        document.getElementById('createForm').classList.add('hidden');
+        document.getElementById('capsulesSection').classList.add('hidden');
+      }
+    });
+
+    document.getElementById('toggleAuth').addEventListener('click', (event) => {
+      event.preventDefault();
       isLoginMode = !isLoginMode;
+
       document.getElementById('authTitle').textContent = isLoginMode ? 'Login' : 'Sign Up';
-      document.querySelector('#authSubmitBtn').textContent = isLoginMode ? 'Login' : 'Sign Up';
+      document.getElementById('authSubtitle').textContent = isLoginMode ? 'Welcome back!' : 'Create an account to save your future memories.';
+      document.getElementById('authSubmitBtn').textContent = isLoginMode ? 'Login' : 'Sign Up';
       document.getElementById('nameGroup').classList.toggle('hidden', isLoginMode);
-      document.getElementById('toggleAuth').textContent = isLoginMode ? "No account? Sign up" : 'Already have an account? Login';
+      document.getElementById('toggleAuth').textContent = isLoginMode ? 'No account? Sign up' : 'Already have an account? Login';
     });
 
     document.getElementById('authSubmitBtn').addEventListener('click', async () => {
-      const email = document.getElementById('authEmail').value;
+      const email = document.getElementById('authEmail').value.trim();
       const password = document.getElementById('authPassword').value;
-      const name = document.getElementById('authName').value;
+      const name = document.getElementById('authName').value.trim();
 
       if (!email || !password) {
-        showAlert('Please fill in all fields!', 'error');
+        showAlert('Isi email dan password dulu.', 'error');
         return;
       }
 
       if (!isLoginMode && !name) {
-        showAlert('Please enter your name!', 'error');
+        showAlert('Isi nama kamu dulu.', 'error');
         return;
       }
 
+      const submitButton = document.getElementById('authSubmitBtn');
+      submitButton.disabled = true;
+
       if (isLoginMode) {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        submitButton.disabled = false;
+
         if (error) {
           showAlert(error.message, 'error');
-        } else {
-          currentUser = data.user;
-          showAlert('Welcome back! 🎉', 'success');
-          showLoggedIn();
-          await loadCapsules();
+          return;
         }
+
+        currentUser = data.user;
+        updateNavbar();
+
+        if (authReturnToPublic && currentPublicCapsule) {
+          document.getElementById('appContent').classList.add('hidden');
+          document.getElementById('publicView').classList.remove('hidden');
+          document.getElementById('contributionModal').classList.add('active');
+          authReturnToPublic = false;
+          return;
+        }
+
+        showLoggedIn();
+        await loadCapsules();
+        showAlert('Welcome back! 🎉', 'success');
       } else {
-        const { data, error } = await supabase.auth.signUp({ email, password });
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { name }
+          }
+        });
+
+        submitButton.disabled = false;
+
         if (error) {
           showAlert(error.message, 'error');
-        } else {
-          await supabase.from('profiles').insert([{ id: data.user.id, email, name }]);
-          currentUser = data.user;
-          showAlert('Account created! 🎉', 'success');
+          return;
+        }
+
+        if (data.user) {
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .upsert({ id: data.user.id, email, name }, { onConflict: 'id' });
+
+          if (profileError) {
+            console.warn('Profile could not be saved:', profileError.message);
+          }
+        }
+
+        currentUser = data.user || null;
+        updateNavbar();
+
+        showAlert('Account dibuat. Cek email untuk verifikasi jika diminta.', 'success');
+
+        if (authReturnToPublic && currentPublicCapsule) {
+          document.getElementById('appContent').classList.add('hidden');
+          document.getElementById('publicView').classList.remove('hidden');
+          authReturnToPublic = false;
+
+          if (currentUser) {
+            document.getElementById('contributionModal').classList.add('active');
+          }
+          return;
+        }
+
+        if (currentUser) {
           showLoggedIn();
           await loadCapsules();
         }
@@ -856,34 +1141,50 @@
     async function logout() {
       await supabase.auth.signOut();
       currentUser = null;
+      capsules = [];
+      updateNavbar();
+
+      if (currentPublicCapsule) {
+        showAlert('Kamu sudah logout.', 'success');
+        return;
+      }
+
       showLoggedOut();
+      showAlert('Logged out.', 'success');
+    }
+
+    function updateNavbar() {
+      const authButton = document.getElementById('authBtn');
+      const userName = document.getElementById('userName');
+
+      if (currentUser) {
+        authButton.textContent = 'Logout';
+        userName.textContent = currentUser.email;
+        userName.classList.remove('hidden');
+      } else {
+        authButton.textContent = 'Login';
+        userName.classList.add('hidden');
+      }
     }
 
     function showLoggedIn() {
-      document.getElementById('authBtn').innerHTML = 'Logout';
-      document.getElementById('authBtn').onclick = logout;
-      document.getElementById('userName').textContent = currentUser.email;
-      document.getElementById('userName').classList.remove('hidden');
+      updateNavbar();
       document.getElementById('authForms').classList.add('hidden');
       document.getElementById('createForm').classList.remove('hidden');
       document.getElementById('capsulesSection').classList.remove('hidden');
     }
 
     function showLoggedOut() {
-      document.getElementById('authBtn').innerHTML = 'Login';
-      document.getElementById('authBtn').onclick = () => {
-        document.getElementById('authForms').classList.remove('hidden');
-        document.getElementById('createForm').classList.add('hidden');
-        document.getElementById('capsulesSection').classList.add('hidden');
-      };
-      document.getElementById('userName').classList.add('hidden');
+      updateNavbar();
       document.getElementById('authForms').classList.add('hidden');
       document.getElementById('createForm').classList.add('hidden');
       document.getElementById('capsulesSection').classList.add('hidden');
+      document.getElementById('emptyState').classList.add('hidden');
     }
 
-    // ===== CAPSULES =====
     async function loadCapsules() {
+      if (!currentUser) return;
+
       const { data, error } = await supabase
         .from('capsules')
         .select('*')
@@ -891,7 +1192,7 @@
         .order('created_at', { ascending: false });
 
       if (error) {
-        showAlert('Failed to load capsules', 'error');
+        showAlert('Failed to load capsules: ' + error.message, 'error');
         return;
       }
 
@@ -916,24 +1217,27 @@
 
       grid.innerHTML = capsules.map(capsule => {
         const openAt = new Date(capsule.open_at);
-        const now = new Date();
-        const isUnlocked = now >= openAt;
+        const isUnlocked = new Date() >= openAt;
         const timeLeft = getTimeLeft(openAt);
         const shareUrl = `${window.location.origin}${window.location.pathname}?capsule=${capsule.id}`;
 
         return `
-          <div class="capsule-card">
+          <article class="capsule-card">
             <span class="capsule-status ${isUnlocked ? 'status-unlocked' : 'status-locked'}">
               ${isUnlocked ? 'Unlocked' : 'Locked'}
             </span>
-            ${capsule.image_url ? `<img src="${capsule.image_url}" alt="${capsule.title}" class="capsule-image">` : ''}
+
+            ${capsule.image_url ? `<img src="${escapeAttribute(capsule.image_url)}" alt="Capsule photo" class="capsule-image">` : ''}
+
             <h3 class="capsule-title">${escapeHtml(capsule.title)}</h3>
+
             <p class="capsule-date">
-              ${isUnlocked ? 
-                `Opened: ${openAt.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}` : 
-                `Opens: ${openAt.toLocaleDateString('en-US', { day: 'numeric', month: 'long', year: 'numeric' })}`
+              ${isUnlocked
+                ? `Opened: ${formatDate(openAt)}`
+                : `Opens: ${formatDate(openAt)}`
               }
             </p>
+
             ${!isUnlocked && timeLeft ? `
               <div class="countdown">
                 <div class="countdown-item">
@@ -950,28 +1254,27 @@
                 </div>
               </div>
             ` : ''}
+
             <div class="capsule-preview">
               ${isUnlocked ? escapeHtml(capsule.message) : '🔒 Message will be revealed when unlocked...'}
             </div>
+
             <div class="capsule-actions">
-              ${isUnlocked ? `
-                <button class="btn btn-primary" onclick="viewCapsule('${capsule.id}')" style="flex: 1;">Read</button>
-              ` : `
-                <button class="btn btn-outline" onclick="previewCapsule('${capsule.id}')" style="flex: 1;">Preview</button>
-              `}
-              ${capsule.is_public ? `
-                <button class="btn btn-success" onclick="copyShareLink('${capsule.id}', '${shareUrl}')" title="Copy share link">
-                  🔗 Share
-                </button>
-              ` : `
-                <button class="btn btn-outline" onclick="makePublic('${capsule.id}')" title="Make public">
-                  🌍 Make Public
-                </button>
-              `}
-              <button class="btn btn-danger" onclick="deleteCapsule('${capsule.id}')">Delete</button>
+              ${isUnlocked
+                ? `<button class="btn btn-primary" type="button" onclick="viewCapsule('${capsule.id}')" style="flex: 1;">Read</button>`
+                : `<button class="btn btn-outline" type="button" onclick="previewCapsule('${capsule.id}')" style="flex: 1;">Preview</button>`
+              }
+
+              ${capsule.is_public
+                ? `<button class="btn btn-success" type="button" onclick="copyShareLink('${escapeAttribute(shareUrl)}')">🔗 Share</button>`
+                : `<button class="btn btn-outline" type="button" onclick="makePublic('${capsule.id}')">🌍 Make Public</button>`
+              }
+
+              <button class="btn btn-danger" type="button" onclick="deleteCapsule('${capsule.id}')">Delete</button>
             </div>
-            ${capsule.is_public ? `<span class="status-public">🌍 Public</span>` : ''}
-          </div>
+
+            ${capsule.is_public ? '<span class="status-public">🌍 Public</span>' : ''}
+          </article>
         `;
       }).join('');
     }
@@ -979,48 +1282,75 @@
     function showCreateForm() {
       document.getElementById('createForm').classList.remove('hidden');
       document.getElementById('capsulesSection').classList.add('hidden');
+      document.getElementById('emptyState').classList.add('hidden');
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Upload image to Supabase Storage
     async function uploadImage(file, capsuleId) {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${capsuleId}.${fileExt}`;
-      const filePath = `${fileName}`;
+      if (!file) return null;
 
-      const { error: uploadError } = await supabase.storage
-        .from('capsule-images')
-        .upload(filePath, file, { upsert: true });
-
-      if (uploadError) {
-        console.error('Upload error:', uploadError);
+      if (file.size > 5 * 1024 * 1024) {
+        showAlert('Ukuran foto maksimal 5 MB.', 'error');
         return null;
       }
 
-      const { data: { publicUrl } } = supabase.storage
+      const extension = (file.name.split('.').pop() || 'jpg').toLowerCase();
+      const filePath = `${currentUser.id}/${capsuleId}.${extension}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('capsule-images')
+        .upload(filePath, file, {
+          upsert: true,
+          contentType: file.type
+        });
+
+      if (uploadError) {
+        showAlert('Upload foto gagal: ' + uploadError.message, 'error');
+        return null;
+      }
+
+      const { data } = supabase.storage
         .from('capsule-images')
         .getPublicUrl(filePath);
 
-      return publicUrl;
+      return data.publicUrl;
     }
 
     document.getElementById('createCapsuleBtn').addEventListener('click', async () => {
+      if (!currentUser) {
+        showAlert('Login dulu untuk membuat capsule.', 'error');
+        return;
+      }
+
       const title = document.getElementById('capsuleTitle').value.trim();
       const message = document.getElementById('capsuleMessage').value.trim();
       const openAt = document.getElementById('capsuleDate').value;
-      const password = document.getElementById('capsulePassword').value.trim();
+      const password = document.getElementById('capsulePassword').value;
       const isPublic = document.getElementById('isPublic').checked;
       const imageFile = document.getElementById('capsuleImage').files[0];
 
       if (!title || !message || !openAt) {
-        showAlert('Please fill in all required fields!', 'error');
+        showAlert('Please fill in all required fields.', 'error');
         return;
       }
 
-      // Create capsule first
+      if (new Date(openAt) <= new Date()) {
+        showAlert('Unlock date harus di masa depan.', 'error');
+        return;
+      }
+
+      if (imageFile && imageFile.size > 5 * 1024 * 1024) {
+        showAlert('Ukuran foto maksimal 5 MB.', 'error');
+        return;
+      }
+
+      const createButton = document.getElementById('createCapsuleBtn');
+      createButton.disabled = true;
+      createButton.textContent = 'Creating...';
+
       const { data: capsule, error } = await supabase
         .from('capsules')
-        .insert([{
+        .insert({
           user_id: currentUser.id,
           title,
           message,
@@ -1028,51 +1358,69 @@
           password: password || null,
           is_public: isPublic,
           image_url: null
-        }])
+        })
         .select()
         .single();
 
       if (error) {
+        createButton.disabled = false;
+        createButton.textContent = 'Create Capsule';
         showAlert('Failed: ' + error.message, 'error');
         return;
       }
 
-      // Upload image if exists
       if (imageFile) {
         const imageUrl = await uploadImage(imageFile, capsule.id);
+
         if (imageUrl) {
-          await supabase
+          const { error: updateError } = await supabase
             .from('capsules')
             .update({ image_url: imageUrl })
             .eq('id', capsule.id);
+
+          if (updateError) {
+            showAlert('Capsule dibuat, tapi foto gagal disimpan.', 'error');
+          }
         }
       }
 
-      showAlert('Capsule created! 🎉', 'success');
+      createButton.disabled = false;
+      createButton.textContent = 'Create Capsule';
+
       document.getElementById('capsuleTitle').value = '';
       document.getElementById('capsuleMessage').value = '';
       document.getElementById('capsulePassword').value = '';
       document.getElementById('capsuleImage').value = '';
       document.getElementById('isPublic').checked = false;
+      setDefaultUnlockDate();
+
       document.getElementById('createForm').classList.add('hidden');
       document.getElementById('capsulesSection').classList.remove('hidden');
+
+      showAlert('Capsule created! 🎉', 'success');
       await loadCapsules();
     });
 
     async function deleteCapsule(id) {
-      if (!confirm('Delete this capsule?')) return;
-      const { error } = await supabase.from('capsules').delete().eq('id', id);
+      if (!confirm('Delete this capsule? This cannot be undone.')) return;
+
+      const { error } = await supabase
+        .from('capsules')
+        .delete()
+        .eq('id', id);
+
       if (error) {
-        showAlert('Failed to delete', 'error');
-      } else {
-        showAlert('Deleted', 'success');
-        await loadCapsules();
+        showAlert('Failed to delete: ' + error.message, 'error');
+        return;
       }
+
+      showAlert('Deleted.', 'success');
+      await loadCapsules();
     }
 
     async function makePublic(id) {
-      if (!confirm('Make this capsule public? Others can view it with the link.')) return;
-      
+      if (!confirm('Make this capsule public? Anyone with the link may contribute before it opens.')) return;
+
       const { error } = await supabase
         .from('capsules')
         .update({ is_public: true })
@@ -1080,91 +1428,108 @@
 
       if (error) {
         showAlert('Failed: ' + error.message, 'error');
-      } else {
-        showAlert('Capsule is now public! 🌍', 'success');
-        await loadCapsules();
+        return;
       }
+
+      showAlert('Capsule is now public! 🌍', 'success');
+      await loadCapsules();
     }
 
-    function copyShareLink(id, url) {
-      navigator.clipboard.writeText(url);
-      showAlert('Link copied! Share it with anyone 🎉', 'success');
+    function copyShareLink(url) {
+      navigator.clipboard.writeText(url)
+        .then(() => showAlert('Link copied! Share it with your friends 🎉', 'success'))
+        .catch(() => showAlert('Tidak bisa copy otomatis. Silakan salin URL dari browser.', 'error'));
     }
 
     async function viewCapsule(id) {
-      const capsule = capsules.find(c => c.id === id);
+      const capsule = capsules.find(item => item.id === id);
       if (!capsule) return;
+
+      currentViewedCapsule = capsule;
 
       if (capsule.password) {
         currentCapsuleId = id;
         document.getElementById('passwordModal').classList.add('active');
-      } else {
-        await showCapsuleContent(capsule);
+        return;
       }
+
+      await showCapsuleContent(capsule);
     }
 
     async function showCapsuleContent(capsule) {
+      currentViewedCapsule = capsule;
+
       document.getElementById('modalTitle').textContent = capsule.title;
       document.getElementById('modalMessage').textContent = capsule.message;
-      
+
       const modalImage = document.getElementById('modalImage');
       if (capsule.image_url) {
         modalImage.src = capsule.image_url;
         modalImage.classList.remove('hidden');
       } else {
+        modalImage.src = '';
         modalImage.classList.add('hidden');
       }
 
-      // Load contributors
       await loadContributors(capsule.id);
-
       document.getElementById('viewModal').classList.add('active');
     }
 
     async function loadContributors(capsuleId) {
       const { data: contributors, error } = await supabase
         .from('contributions')
-        .select('*, profiles(name)')
+        .select('message, created_at, user_id')
         .eq('capsule_id', capsuleId)
         .order('created_at', { ascending: true });
 
-      const contributorsSection = document.getElementById('contributorsSection');
-      const contributorsList = document.getElementById('contributorsList');
+      const section = document.getElementById('contributorsSection');
+      const list = document.getElementById('contributorsList');
 
-      if (contributors && contributors.length > 0) {
-        contributorsSection.classList.remove('hidden');
-        contributorsList.innerHTML = contributors.map(c => `
-          <div class="contributor-item">
-            <div class="contributor-name">${escapeHtml(c.profiles?.name || 'Anonymous')}</div>
-            <div class="contributor-message">${escapeHtml(c.message)}</div>
-          </div>
-        `).join('');
-      } else {
-        contributorsSection.classList.add('hidden');
+      if (error || !contributors || contributors.length === 0) {
+        section.classList.add('hidden');
+        list.innerHTML = '';
+        return;
       }
+
+      section.classList.remove('hidden');
+      list.innerHTML = contributors.map((contributor, index) => `
+        <div class="contributor-item">
+          <div class="contributor-name">Contributor ${index + 1}</div>
+          <div class="contributor-message">${escapeHtml(contributor.message)}</div>
+        </div>
+      `).join('');
     }
 
-    document.getElementById('unlockBtn').addEventListener('click', () => {
+    document.getElementById('unlockBtn').addEventListener('click', async () => {
       const password = document.getElementById('capsulePasswordInput').value;
-      const capsule = capsules.find(c => c.id === currentCapsuleId);
-      if (capsule && capsule.password === password) {
-        showCapsuleContent(capsule);
-        closePasswordModal();
-      } else {
-        showAlert('Wrong password!', 'error');
+      const capsule = capsules.find(item => item.id === currentCapsuleId);
+
+      if (!capsule) {
+        showAlert('Capsule not found.', 'error');
+        return;
       }
+
+      if (capsule.password !== password) {
+        showAlert('Wrong password.', 'error');
+        return;
+      }
+
+      closePasswordModal();
+      await showCapsuleContent(capsule);
     });
 
     function previewCapsule(id) {
-      const capsule = capsules.find(c => c.id === id);
+      const capsule = capsules.find(item => item.id === id);
       if (!capsule) return;
-      const openAt = new Date(capsule.open_at);
+
       alert(`🔒 ${capsule.title}
-Opens: ${openAt.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}`);
+
+Opens: ${formatDate(new Date(capsule.open_at))}`);
     }
 
     function closeModal() {
       document.getElementById('viewModal').classList.remove('active');
+      currentViewedCapsule = null;
     }
 
     function closePasswordModal() {
@@ -1174,18 +1539,60 @@ Opens: ${openAt.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', m
     }
 
     function shareToWA() {
-      const text = `🎉 I just opened my Time Capsule!`;
+      if (!currentViewedCapsule) return;
+
+      const url = `${window.location.origin}${window.location.pathname}?capsule=${currentViewedCapsule.id}`;
+      const text = `📦 Check out my Time Capsule: ${currentViewedCapsule.title}
+${url}`;
       window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
     }
 
+    function sendEmailReminder() {
+      if (!currentViewedCapsule || !currentUser) {
+        showAlert('Login dulu untuk menggunakan email reminder.', 'error');
+        return;
+      }
+
+      const capsule = currentViewedCapsule;
+      const openDate = new Date(capsule.open_at);
+      const capsuleUrl = `${window.location.origin}${window.location.pathname}?capsule=${capsule.id}`;
+      const isOpen = openDate <= new Date();
+
+      const subject = `🎉 Your Capsule "${capsule.title}" is ${isOpen ? 'OPEN!' : 'Opening Soon!'}`;
+      const body = [
+        `Hi ${currentUser.email.split('@')[0]},`,
+        '',
+        isOpen
+          ? 'Your time capsule is now OPEN! 🎉'
+          : `Your time capsule will open on ${formatDate(openDate)}. ⏰`,
+        '',
+        `📦 Capsule: ${capsule.title}`,
+        `🔗 Link: ${capsuleUrl}`,
+        '',
+        '---',
+        'Sent from Time Capsule App'
+      ].join('
+');
+
+      window.location.href =
+        `mailto:${encodeURIComponent(currentUser.email)}` +
+        `?subject=${encodeURIComponent(subject)}` +
+        `&body=${encodeURIComponent(body)}`;
+
+      showAlert('Opening email app... 📧', 'success');
+    }
+
     function copyLink() {
-      navigator.clipboard.writeText(window.location.href);
-      showAlert('Link copied!', 'success');
+      if (!currentViewedCapsule) return;
+
+      const url = `${window.location.origin}${window.location.pathname}?capsule=${currentViewedCapsule.id}`;
+      copyShareLink(url);
     }
 
     function getTimeLeft(openAt) {
       const diff = openAt - new Date();
       if (diff <= 0) return null;
+
       return {
         days: Math.floor(diff / (1000 * 60 * 60 * 24)),
         hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
@@ -1193,16 +1600,35 @@ Opens: ${openAt.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', m
       };
     }
 
-    function showAlert(message, type) {
-      const alertBox = document.getElementById('alertBox');
-      alertBox.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
-      setTimeout(() => alertBox.innerHTML = '', 4000);
+    function formatDate(date) {
+      return date.toLocaleDateString('en-US', {
+        weekday: 'long',
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
     }
 
-    function escapeHtml(text) {
-      const div = document.createElement('div');
-      div.textContent = text;
-      return div.innerHTML;
+    function showAlert(message, type) {
+      const alertBox = document.getElementById('alertBox');
+      alertBox.innerHTML = `<div class="alert alert-${type}">${escapeHtml(message)}</div>`;
+
+      clearTimeout(showAlert.timeout);
+      showAlert.timeout = setTimeout(() => {
+        alertBox.innerHTML = '';
+      }, 4500);
+    }
+
+    function escapeHtml(value) {
+      const element = document.createElement('div');
+      element.textContent = value == null ? '' : String(value);
+      return element.innerHTML;
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value).replace(/"/g, '&quot;');
     }
 
     document.getElementById('themeToggle').addEventListener('click', () => {
