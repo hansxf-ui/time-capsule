@@ -148,7 +148,7 @@
     }
 
     .btn-danger {
-      background: var(--danger);
+      background: #ef4444;
       color: white;
       padding: 0.5rem 1rem;
     }
@@ -299,6 +299,14 @@
       color: #1e40af;
     }
 
+    .capsule-image {
+      width: 100%;
+      height: 200px;
+      object-fit: cover;
+      border-radius: var(--radius-sm);
+      margin-bottom: 1rem;
+    }
+
     .capsule-title {
       font-size: 1.25rem;
       font-weight: 700;
@@ -403,8 +411,10 @@
       background: var(--surface-light);
       border-radius: var(--radius-lg);
       padding: 2.5rem;
-      max-width: 500px;
+      max-width: 600px;
       width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
       transform: scale(0.9);
       transition: all 0.3s ease;
     }
@@ -443,6 +453,14 @@
       white-space: pre-wrap;
       line-height: 1.8;
       margin-bottom: 1.5rem;
+    }
+
+    .modal-image {
+      width: 100%;
+      max-height: 400px;
+      object-fit: contain;
+      border-radius: var(--radius-sm);
+      margin-bottom: 1rem;
     }
 
     .alert {
@@ -495,6 +513,35 @@
       margin-bottom: 1rem;
     }
 
+    .contributors-section {
+      margin-top: 2rem;
+      padding-top: 2rem;
+      border-top: 1px solid var(--border-light);
+    }
+
+    .contributor-item {
+      background: var(--bg-light);
+      padding: 1rem;
+      border-radius: var(--radius-sm);
+      margin-bottom: 1rem;
+      text-align: left;
+    }
+
+    body.dark-mode .contributor-item {
+      background: var(--bg-dark);
+    }
+
+    .contributor-name {
+      font-weight: 600;
+      color: var(--primary);
+      margin-bottom: 0.25rem;
+    }
+
+    .contributor-message {
+      color: var(--text-light);
+      font-size: 0.95rem;
+    }
+
     .hidden { display: none !important; }
 
     @media (max-width: 768px) {
@@ -535,9 +582,9 @@
         </p>
       </div>
       <p style="margin-top: 2rem; color: var(--text-muted-light); font-size: 0.9rem;">
-  Create your own time capsule at 
-  <a href="https://hansxf-ui.github.io/time-capsule/" style="color: var(--primary);">Time Capsule</a>
-</p>
+        Create your own time capsule at 
+        <a href="https://hansxf-ui.github.io/time-capsule/" style="color: var(--primary);">Time Capsule</a>
+      </p>
     </div>
 
     <!-- App Content -->
@@ -580,6 +627,11 @@
           <textarea id="capsuleMessage" class="form-control" placeholder="Write your message..."></textarea>
         </div>
         <div class="form-group">
+          <label>Upload Photo (optional)</label>
+          <input type="file" id="capsuleImage" class="form-control" accept="image/*">
+          <p style="font-size: 0.85rem; color: var(--text-muted-light); margin-top: 0.5rem;">Max 5MB. JPG, PNG, or WebP</p>
+        </div>
+        <div class="form-group">
           <label>Unlock Date</label>
           <input type="datetime-local" id="capsuleDate" class="form-control">
         </div>
@@ -615,21 +667,31 @@
     </div>
   </div>
 
+  <!-- View Modal -->
   <div id="viewModal" class="modal">
     <div class="modal-content">
       <div class="modal-header">
         <h3 id="modalTitle" class="modal-title"></h3>
         <button class="modal-close" onclick="closeModal()">×</button>
       </div>
+      <img id="modalImage" class="modal-image hidden" src="" alt="Capsule photo">
       <div id="modalMessage" class="modal-message"></div>
-      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-bottom: 1.5rem;">
+      
+      <!-- Contributors -->
+      <div id="contributorsSection" class="contributors-section hidden">
+        <h4 style="margin-bottom: 1rem; color: var(--primary);">👥 Contributors</h4>
+        <div id="contributorsList"></div>
+      </div>
+
+      <div style="display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.5rem;">
         <button class="btn btn-primary" onclick="shareToWA()">Share on WhatsApp</button>
         <button class="btn btn-outline" onclick="copyLink()">Copy Link</button>
       </div>
-      <button class="btn btn-outline" onclick="closeModal()" style="width: 100%;">Close</button>
+      <button class="btn btn-outline" onclick="closeModal()" style="width: 100%; margin-top: 0.75rem;">Close</button>
     </div>
   </div>
 
+  <!-- Password Modal -->
   <div id="passwordModal" class="modal">
     <div class="modal-content" style="max-width: 400px;">
       <div class="modal-header">
@@ -654,10 +716,8 @@
     let currentCapsuleId = null;
 
     document.addEventListener('DOMContentLoaded', async () => {
-      // Check public capsule first
       await checkPublicCapsule();
 
-      // Check auth
       const { data: { session } } = await supabase.auth.getSession();
       if (session) {
         currentUser = session.user;
@@ -667,14 +727,12 @@
         showLoggedOut();
       }
 
-      // Theme
       const savedTheme = localStorage.getItem('theme');
       if (savedTheme === 'dark') {
         document.body.classList.add('dark-mode');
         document.getElementById('themeToggle').textContent = '☀️';
       }
 
-      // Min date
       const now = new Date();
       now.setDate(now.getDate() + 1);
       now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
@@ -705,8 +763,8 @@
 
     function showPublicView(capsule) {
       document.getElementById('appContent').classList.add('hidden');
-      document.getElementById('publicView').classList.remove('hidden');
       document.querySelector('.navbar').style.display = 'none';
+      document.getElementById('publicView').classList.remove('hidden');
 
       document.getElementById('publicTitle').textContent = capsule.title;
       
@@ -868,6 +926,7 @@
             <span class="capsule-status ${isUnlocked ? 'status-unlocked' : 'status-locked'}">
               ${isUnlocked ? 'Unlocked' : 'Locked'}
             </span>
+            ${capsule.image_url ? `<img src="${capsule.image_url}" alt="${capsule.title}" class="capsule-image">` : ''}
             <h3 class="capsule-title">${escapeHtml(capsule.title)}</h3>
             <p class="capsule-date">
               ${isUnlocked ? 
@@ -923,19 +982,43 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
+    // Upload image to Supabase Storage
+    async function uploadImage(file, capsuleId) {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${capsuleId}.${fileExt}`;
+      const filePath = `${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('capsule-images')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        return null;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('capsule-images')
+        .getPublicUrl(filePath);
+
+      return publicUrl;
+    }
+
     document.getElementById('createCapsuleBtn').addEventListener('click', async () => {
       const title = document.getElementById('capsuleTitle').value.trim();
       const message = document.getElementById('capsuleMessage').value.trim();
       const openAt = document.getElementById('capsuleDate').value;
       const password = document.getElementById('capsulePassword').value.trim();
       const isPublic = document.getElementById('isPublic').checked;
+      const imageFile = document.getElementById('capsuleImage').files[0];
 
       if (!title || !message || !openAt) {
         showAlert('Please fill in all required fields!', 'error');
         return;
       }
 
-      const { data, error } = await supabase
+      // Create capsule first
+      const { data: capsule, error } = await supabase
         .from('capsules')
         .insert([{
           user_id: currentUser.id,
@@ -943,21 +1026,37 @@
           message,
           open_at: openAt,
           password: password || null,
-          is_public: isPublic
-        }]);
+          is_public: isPublic,
+          image_url: null
+        }])
+        .select()
+        .single();
 
       if (error) {
         showAlert('Failed: ' + error.message, 'error');
-      } else {
-        showAlert('Capsule created! 🎉', 'success');
-        document.getElementById('capsuleTitle').value = '';
-        document.getElementById('capsuleMessage').value = '';
-        document.getElementById('capsulePassword').value = '';
-        document.getElementById('isPublic').checked = false;
-        document.getElementById('createForm').classList.add('hidden');
-        document.getElementById('capsulesSection').classList.remove('hidden');
-        await loadCapsules();
+        return;
       }
+
+      // Upload image if exists
+      if (imageFile) {
+        const imageUrl = await uploadImage(imageFile, capsule.id);
+        if (imageUrl) {
+          await supabase
+            .from('capsules')
+            .update({ image_url: imageUrl })
+            .eq('id', capsule.id);
+        }
+      }
+
+      showAlert('Capsule created! 🎉', 'success');
+      document.getElementById('capsuleTitle').value = '';
+      document.getElementById('capsuleMessage').value = '';
+      document.getElementById('capsulePassword').value = '';
+      document.getElementById('capsuleImage').value = '';
+      document.getElementById('isPublic').checked = false;
+      document.getElementById('createForm').classList.add('hidden');
+      document.getElementById('capsulesSection').classList.remove('hidden');
+      await loadCapsules();
     });
 
     async function deleteCapsule(id) {
@@ -992,14 +1091,56 @@
       showAlert('Link copied! Share it with anyone 🎉', 'success');
     }
 
-    function viewCapsule(id) {
+    async function viewCapsule(id) {
       const capsule = capsules.find(c => c.id === id);
       if (!capsule) return;
+
       if (capsule.password) {
         currentCapsuleId = id;
         document.getElementById('passwordModal').classList.add('active');
       } else {
-        showCapsuleContent(capsule);
+        await showCapsuleContent(capsule);
+      }
+    }
+
+    async function showCapsuleContent(capsule) {
+      document.getElementById('modalTitle').textContent = capsule.title;
+      document.getElementById('modalMessage').textContent = capsule.message;
+      
+      const modalImage = document.getElementById('modalImage');
+      if (capsule.image_url) {
+        modalImage.src = capsule.image_url;
+        modalImage.classList.remove('hidden');
+      } else {
+        modalImage.classList.add('hidden');
+      }
+
+      // Load contributors
+      await loadContributors(capsule.id);
+
+      document.getElementById('viewModal').classList.add('active');
+    }
+
+    async function loadContributors(capsuleId) {
+      const { data: contributors, error } = await supabase
+        .from('contributions')
+        .select('*, profiles(name)')
+        .eq('capsule_id', capsuleId)
+        .order('created_at', { ascending: true });
+
+      const contributorsSection = document.getElementById('contributorsSection');
+      const contributorsList = document.getElementById('contributorsList');
+
+      if (contributors && contributors.length > 0) {
+        contributorsSection.classList.remove('hidden');
+        contributorsList.innerHTML = contributors.map(c => `
+          <div class="contributor-item">
+            <div class="contributor-name">${escapeHtml(c.profiles?.name || 'Anonymous')}</div>
+            <div class="contributor-message">${escapeHtml(c.message)}</div>
+          </div>
+        `).join('');
+      } else {
+        contributorsSection.classList.add('hidden');
       }
     }
 
@@ -1013,12 +1154,6 @@
         showAlert('Wrong password!', 'error');
       }
     });
-
-    function showCapsuleContent(capsule) {
-      document.getElementById('modalTitle').textContent = capsule.title;
-      document.getElementById('modalMessage').textContent = capsule.message;
-      document.getElementById('viewModal').classList.add('active');
-    }
 
     function previewCapsule(id) {
       const capsule = capsules.find(c => c.id === id);
